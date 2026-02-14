@@ -601,6 +601,7 @@ export default function PublicEventPage() {
     const variance = brightnessSamples.reduce((acc, val) => acc + Math.pow(val - brightness, 2), 0) / brightnessSamples.length;
     const contrast = Math.sqrt(variance);
     
+    
     let detections: any[] = [];
     let faceAngle = 'frontal';
     let faceBox = { x: 0, y: 0, width: 0, height: 0 };
