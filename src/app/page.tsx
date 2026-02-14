@@ -37,7 +37,7 @@ const galleryImages = [
 ];
 
 // API Configuration
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://photography-server-1.onrender.com/api";
 
 // Role Routes
 const ROLE_ROUTES: Record<string, string> = {

@@ -576,7 +576,7 @@ const MediaPreviewModal = ({ isOpen, onClose, mediaFiles, eventName, eventId, on
     try {
       const token = localStorage.getItem("token");
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"}/events/${eventId}/media/${encodeURIComponent(mediaToDelete.publicId)}`,
+        `${process.env.NEXT_PUBLIC_API_URL || "https://photography-server-1.onrender.com/api"}/events/${eventId}/media/${encodeURIComponent(mediaToDelete.publicId)}`,
         {
           method: 'DELETE',
           headers: {
@@ -614,7 +614,7 @@ const MediaPreviewModal = ({ isOpen, onClose, mediaFiles, eventName, eventId, on
     try {
       const token = localStorage.getItem("token");
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"}/events/${eventId}/media/bulk-delete`,
+        `${process.env.NEXT_PUBLIC_API_URL || "https://photography-server-1.onrender.com/api"}/events/${eventId}/media/bulk-delete`,
         {
           method: 'POST',
           headers: {
@@ -1031,7 +1031,7 @@ const MediaUploadModal = ({ isOpen, onClose, eventId, eventName, onUploadComplet
     try {
       const token = localStorage.getItem("token");
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"}/events/${eventId}/upload-media`,
+        `${process.env.NEXT_PUBLIC_API_URL || "https://photography-server-1.onrender.com/api"}/events/${eventId}/upload-media`,
         {
           method: 'POST',
           headers: {
@@ -1382,7 +1382,7 @@ export default function EventPage() {
       const token = localStorage.getItem("token");
       if (!token) return;
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"}/events/my-events`,
+        `${process.env.NEXT_PUBLIC_API_URL || "https://photography-server-1.onrender.com/api"}/events/my-events`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       const data = await response.json();
@@ -1428,7 +1428,7 @@ export default function EventPage() {
     try {
       const token = localStorage.getItem("token");
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"}/events/${eventId}`,
+        `${process.env.NEXT_PUBLIC_API_URL || "https://photography-server-1.onrender.com/api"}/events/${eventId}`,
         { method: "DELETE", headers: { Authorization: `Bearer ${token}` } }
       );
       const data = await response.json();
@@ -1457,8 +1457,8 @@ export default function EventPage() {
       const token = localStorage.getItem("token");
       if (!token) return;
       const url = editingEvent
-        ? `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"}/events/${editingEvent._id}`
-        : `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"}/events/create`;
+        ? `${process.env.NEXT_PUBLIC_API_URL || "https://photography-server-1.onrender.com/api"}/events/${editingEvent._id}`
+        : `${process.env.NEXT_PUBLIC_API_URL || "https://photography-server-1.onrender.com/api"}/events/create`;
       const method = editingEvent ? "PUT" : "POST";
       const payload = { ...eventData, clientId };
 

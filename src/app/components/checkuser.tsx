@@ -25,7 +25,7 @@ const CheckUser: React.FC<CheckUserProps> = () => {
         }
 
         // 3. Verify token with your backend API
-        const response = await fetch('http://localhost:5000/api/auth/me', {
+        const response = await fetch('https://photography-server-1.onrender.com/api/auth/me', {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${token}`,

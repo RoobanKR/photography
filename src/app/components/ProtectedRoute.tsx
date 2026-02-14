@@ -5,7 +5,7 @@ import { useEffect, ReactNode, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import axios from 'axios';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://photography-server-1.onrender.com/api';
 
 interface ProtectedRouteProps {
   children: ReactNode;
