@@ -3,13 +3,18 @@
 // UserToken collection at login, so a request is only treated as "logged out"
 // when the server answers 401 — never because the server is briefly unreachable.
 
-// A deployed page must never ask the browser for http://localhost: that is the
-// visitor's own machine, so the browser shows a local-network permission prompt
-// and the request fails either way. Only local development falls back to it;
-// a deployed build without NEXT_PUBLIC_API_URL uses a same-origin /api instead.
+// Where the API lives, in order of preference:
+//   1. NEXT_PUBLIC_API_URL, if the host sets it (inlined at build time)
+//   2. local development -> the server on port 5000
+//   3. anything else (a deploy) -> the hosted API on Render
+// The hosted default is here on purpose: a deployed build with no environment
+// variable used to fall back to localhost, which is the visitor's own machine,
+// or to a same-origin /api, which does not exist on Vercel and returned 404.
+const HOSTED_API = "https://photography-server-2.onrender.com/api";
+
 export const API_URL =
   process.env.NEXT_PUBLIC_API_URL ||
-  (process.env.NODE_ENV === "development" ? "http://localhost:5000/api" : "/api");
+  (process.env.NODE_ENV === "development" ? "http://localhost:5000/api" : HOSTED_API);
 
 const TOKEN_KEY = "token";
 const USER_KEY = "user";
