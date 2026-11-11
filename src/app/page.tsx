@@ -1,440 +1,1031 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import Image from "next/image";
-import { motion, AnimatePresence } from "framer-motion"; // Added AnimatePresence
-import { Eye, EyeOff, ArrowRight, Aperture, Sun, Moon, CheckCircle } from "lucide-react"; // Added CheckCircle
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
-import axios from "axios";
-import { useRouter } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
+import { AnimatePresence, motion, useScroll, useTransform } from "framer-motion";
+import {
+  ArrowRight,
+  ArrowUp,
+  ChevronLeft,
+  ChevronRight,
+  Download,
+  Instagram,
+  Mail,
+  MapPin,
+  Phone,
+  QrCode,
+  ScanFace,
+  X,
+  Youtube,
+} from "lucide-react";
+import { getToken } from "@/lib/api";
+import {
+  CONTACT_BACKDROP,
+  COUNTERS,
+  HERO_SLIDES,
+  MARQUEE,
+  PARALLAX_BACKDROP,
+  PLANS,
+  PORTFOLIO,
+  SERVICES,
+  STORIES,
+  STUDIO,
+} from "@/components/website/content";
+import {
+  Bokeh,
+  Counter,
+  DrawLine,
+  Grain,
+  LetterHeading,
+  ParallaxBackdrop,
+  Reveal,
+  RevealImage,
+} from "@/components/website/effects";
 
-// --- Configuration: Infinite Scrolling Images ---
-const galleryImages = [
-  // Column 1
-  [
-    "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=800&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1517841905240-472988babdf9?q=80&w=800&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?q=80&w=800&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=800&auto=format&fit=crop",
-  ],
-  // Column 2
-  [
-    "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=800&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1552058544-f2b08422138a?q=80&w=800&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1520333789090-1afc82db536a?q=80&w=800&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=800&auto=format&fit=crop",
-  ],
-  // Column 3
-  [
-    "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=800&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1534030347209-7147fd2e7a3a?q=80&w=800&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?q=80&w=800&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=800&auto=format&fit=crop",
-  ],
+const EASE = [0.22, 1, 0.36, 1] as const;
+const SLIDE_MS = 6500;
+
+const NAV = [
+  { href: "#about", label: "About" },
+  { href: "#stories", label: "Stories" },
+  { href: "#portfolio", label: "Portfolio" },
+  { href: "#services", label: "Services" },
+  { href: "#plans", label: "Plans" },
+  { href: "#contact", label: "Contact" },
 ];
 
-// API Configuration
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://photography-server-1.onrender.com/api";
+// Small uppercase label above section headings
+const eyebrow = "font-sans text-[11px] font-medium uppercase tracking-[0.4em]";
+// Large serif section heading with wide letter spacing
+const display = "font-serif font-light uppercase tracking-[0.1em] sm:tracking-[0.18em]";
 
-// Role Routes
-const ROLE_ROUTES: Record<string, string> = {
-  superadmin: "/pages/superadmin",
-  admin: "/pages/admindashboard",
-  manager: "/pages/manager/dashboard",
-  staff: "/pages/staff/dashboard",
-  user: "/pages/dashboard",
-  customer: "/pages/dashboard",
-  client: "/pages/client/dashboard",
-  photographer: "/pages/photographer/dashboard",
-  editor: "/pages/editor/dashboard",
-};
-
-export default function Home() {
-  const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isMounted, setIsMounted] = useState(false);
-  const [loginError, setLoginError] = useState<string | null>(null);
-  const [showSuccess, setShowSuccess] = useState(false); // New state for success animation
-  
-  // Theme State
-  const [theme, setTheme] = useState("dark");
-  
-  const router = useRouter();
-  
-  // Form state
-  const [formData, setFormData] = useState({
-    email: "suryaadmin@gmail.com",
-    password: "123"
-  });
+export default function Website() {
+  const [loading, setLoading] = useState(true);
+  const [signedIn, setSignedIn] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
-    setIsMounted(true);
-    
-    // 1. Load Theme
-    const savedTheme = localStorage.getItem("theme");
-    if (savedTheme) {
-      setTheme(savedTheme);
-    } else {
-      setTheme("dark");
-      localStorage.setItem("theme", "dark");
-    }
+    setSignedIn(Boolean(getToken()));
+    const timer = setTimeout(() => setLoading(false), 1800);
 
-    // 2. Check Auth
-    const token = localStorage.getItem("token");
-    const userStr = localStorage.getItem("user");
-    
-    if (token && userStr) {
-      try {
-        const user = JSON.parse(userStr);
-        handleRoleRedirect(user.role);
-      } catch (error) {
-        console.error("Error parsing user data:", error);
-        localStorage.clear();
-      }
-    }
+    const onScroll = () => setScrolled(window.scrollY > 60);
+    onScroll();
+    window.addEventListener("scroll", onScroll);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener("scroll", onScroll);
+    };
   }, []);
 
-  const toggleTheme = () => {
-    const newTheme = theme === "dark" ? "light" : "dark";
-    setTheme(newTheme);
-    localStorage.setItem("theme", newTheme);
-  };
+  // Lock page scroll while the full-screen menu is open; Escape closes it
+  useEffect(() => {
+    document.body.style.overflow = menuOpen ? "hidden" : "";
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setMenuOpen(false);
+    if (menuOpen) window.addEventListener("keydown", onKey);
+    return () => {
+      document.body.style.overflow = "";
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [menuOpen]);
 
-  const handleRoleRedirect = (role: string) => {
-    const normalizedRole = role.toLowerCase().trim();
-    const redirectPath = ROLE_ROUTES[normalizedRole] || "/pages/dashboard";
-    router.push(redirectPath);
-  };
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-    setLoginError(null);
-  };
-
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setLoginError(null);
-
-    try {
-      const response = await axios.post(`${API_URL}/auth/login`, {
-        email: formData.email,
-        password: formData.password
-      }, {
-        headers: { 'Content-Type': 'application/json' },
-        withCredentials: true
-      });
-
-      if (response.data.success) {
-        // 1. Trigger Success Animation
-        setShowSuccess(true);
-
-        localStorage.setItem("token", response.data.token);
-        localStorage.setItem("user", JSON.stringify(response.data.user));
-        localStorage.setItem("theme", theme);
-        
-        const userRole = response.data.user.role || "user";
-
-        // 2. Wait 1.5s for the animation to play before redirecting
-        setTimeout(() => {
-            handleRoleRedirect(userRole);
-        }, 1500);
-
-      } else {
-        setLoginError(response.data.message || "Login failed");
-        setIsLoading(false); // Stop loading if failed
-      }
-    } catch (error: any) {
-      setIsLoading(false); // Stop loading on error
-      console.error("Login error details:", error);
-      if (error.response) {
-        setLoginError(error.response.data.message || `Login failed: ${error.response.status}`);
-      } else if (error.request) {
-        setLoginError("Cannot connect to server. Please check if server is running.");
-      } else {
-        setLoginError("An unexpected error occurred");
-      }
-    }
-  };
-
-  if (!isMounted) return null;
+  const studioLink = signedIn ? "/dashboard" : "/login";
 
   return (
-    // THEME WRAPPER: controlled by state
-    <div className={`${theme} h-screen w-full relative`}>
-        
-      {/* --- SUCCESS NOTIFICATION ANIMATION --- */}
-      <AnimatePresence>
-        {showSuccess && (
-            <motion.div
-                initial={{ opacity: 0, y: -50, scale: 0.9 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: -20, scale: 0.9 }}
-                transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                className="fixed top-8 left-0 right-0 mx-auto w-max z-50 flex items-center gap-3 bg-emerald-500 text-white px-6 py-3 rounded-full shadow-2xl backdrop-blur-md"
+    <div className="scroll-smooth bg-[#f5f1ec] font-sans text-stone-800 selection:bg-[#b8935a]/30">
+      <style>{`html { scroll-behavior: smooth; }`}</style>
+
+      <Preloader show={loading} />
+
+      {/* ================= HEADER ================= */}
+      <header
+        className={`fixed inset-x-0 top-0 z-40 transition-all duration-500 ${
+          scrolled ? "bg-[#f5f1ec]/95 py-3 shadow-[0_1px_0_rgba(0,0,0,0.06)] backdrop-blur-md" : "py-6"
+        }`}
+      >
+        <div className="mx-auto flex max-w-[1400px] items-center justify-between px-5 sm:px-10">
+          <a href="#top" className="group flex flex-col leading-none">
+            <span className={`font-serif text-3xl font-medium tracking-[0.25em] transition-colors ${scrolled ? "text-[#b8935a]" : "text-white"}`}>
+              {STUDIO.name}
+            </span>
+            <span className={`mt-1 text-[8px] uppercase tracking-[0.5em] transition-colors ${scrolled ? "text-stone-500" : "text-white/70"}`}>
+              {STUDIO.tagline}
+            </span>
+          </a>
+
+          <div className="flex items-center gap-6 sm:gap-10">
+            <Link
+              href={studioLink}
+              className={`hidden text-[11px] uppercase tracking-[0.35em] transition-colors sm:block ${
+                scrolled ? "text-stone-600 hover:text-[#b8935a]" : "text-white/80 hover:text-white"
+              }`}
             >
-                <div className="bg-white/20 p-1 rounded-full">
-                    <CheckCircle className="w-5 h-5 text-white" />
-                </div>
-                <div className="flex flex-col">
-                    <span className="font-bold text-sm">Login Successful</span>
-                    <span className="text-xs text-emerald-50 opacity-90">Redirecting to dashboard...</span>
-                </div>
+              {signedIn ? "Studio" : "Login"}
+            </Link>
+            <button
+              onClick={() => setMenuOpen(true)}
+              className={`group flex items-center gap-4 text-[11px] uppercase tracking-[0.35em] ${scrolled ? "text-stone-700" : "text-white"}`}
+            >
+              Menu
+              <span className="flex w-10 flex-col gap-[5px]">
+                <span className="h-px w-full bg-current transition-all duration-300 group-hover:w-6" />
+                <span className="h-px w-6 self-end bg-current transition-all duration-300 group-hover:w-full" />
+              </span>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <FullscreenMenu open={menuOpen} onClose={() => setMenuOpen(false)} studioLink={studioLink} signedIn={signedIn} />
+
+      <Hero />
+      <About />
+      <Marquee />
+      <Stories />
+      <Counters />
+      <Portfolio />
+      <Services />
+      <Galleries />
+      <Plans />
+      <Contact />
+      <Footer studioLink={studioLink} signedIn={signedIn} />
+
+      <BackToTop show={scrolled} />
+      <WhatsAppButton />
+    </div>
+  );
+}
+
+/* ================= PRELOADER ================= */
+function Preloader({ show }: { show: boolean }) {
+  return (
+    <AnimatePresence>
+      {show && (
+        <motion.div
+          className="site-preloader fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#141210]"
+          exit={{ y: "-100%" }}
+          transition={{ duration: 1, ease: EASE }}
+        >
+          <div className="flex overflow-hidden">
+            {STUDIO.name.split("").map((char, i) => (
+              <motion.span
+                key={i}
+                className="font-serif text-6xl font-light tracking-[0.3em] text-[#d6b26e] sm:text-7xl"
+                initial={{ y: "100%", opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ duration: 0.9, delay: 0.15 + i * 0.12, ease: EASE }}
+              >
+                {char}
+              </motion.span>
+            ))}
+          </div>
+          <motion.div
+            className="mt-6 h-px w-40 origin-left bg-[#d6b26e]/60"
+            initial={{ scaleX: 0 }}
+            animate={{ scaleX: 1 }}
+            transition={{ duration: 1.4, delay: 0.3, ease: EASE }}
+          />
+          <motion.p
+            className="mt-5 text-[10px] uppercase tracking-[0.6em] text-white/40"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.8 }}
+          >
+            {STUDIO.tagline}
+          </motion.p>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
+
+/* ================= FULL-SCREEN MENU ================= */
+function FullscreenMenu({
+  open,
+  onClose,
+  studioLink,
+  signedIn,
+}: {
+  open: boolean;
+  onClose: () => void;
+  studioLink: string;
+  signedIn: boolean;
+}) {
+  return (
+    <AnimatePresence>
+      {open && (
+        <motion.div
+          className="fixed inset-0 z-50 flex overflow-hidden bg-[#141210] text-white"
+          initial={{ clipPath: "circle(0% at 95% 4%)" }}
+          animate={{ clipPath: "circle(150% at 95% 4%)" }}
+          exit={{ clipPath: "circle(0% at 95% 4%)" }}
+          transition={{ duration: 0.9, ease: EASE }}
+        >
+          <Bokeh count={14} />
+          <button
+            onClick={onClose}
+            className="absolute right-5 top-6 z-10 flex items-center gap-3 text-[11px] uppercase tracking-[0.35em] text-white/70 hover:text-white sm:right-10"
+          >
+            Close <X className="h-5 w-5" />
+          </button>
+
+          <div className="relative mx-auto grid w-full max-w-[1400px] items-center gap-12 px-6 py-24 sm:px-10 lg:grid-cols-[1.4fr_1fr]">
+            <nav className="flex flex-col gap-1">
+              {NAV.map((item, i) => (
+                <motion.a
+                  key={item.href}
+                  href={item.href}
+                  onClick={onClose}
+                  className="group flex items-baseline gap-5 py-1"
+                  initial={{ opacity: 0, x: -60 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.8, delay: 0.25 + i * 0.07, ease: EASE }}
+                >
+                  <span className="font-sans text-xs text-[#d6b26e]">0{i + 1}</span>
+                  <span className="font-serif text-4xl font-light uppercase tracking-[0.15em] text-white/80 transition-all duration-500 group-hover:translate-x-3 group-hover:text-[#d6b26e] sm:text-6xl">
+                    {item.label}
+                  </span>
+                </motion.a>
+              ))}
+            </nav>
+
+            <motion.div
+              className="space-y-8 border-white/10 lg:border-l lg:pl-12"
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.6, ease: EASE }}
+            >
+              <div>
+                <p className={`${eyebrow} text-white/40`}>Get in touch</p>
+                <a href={`tel:${STUDIO.phone.replace(/\s/g, "")}`} className="mt-4 block font-serif text-2xl hover:text-[#d6b26e]">
+                  {STUDIO.phone}
+                </a>
+                <a href={`mailto:${STUDIO.email}`} className="mt-1 block font-serif text-2xl italic hover:text-[#d6b26e]">
+                  {STUDIO.email}
+                </a>
+              </div>
+              <div className="flex gap-4">
+                <SocialIcon href={STUDIO.instagram} label="Instagram"><Instagram className="h-4 w-4" /></SocialIcon>
+                <SocialIcon href={STUDIO.youtube} label="YouTube"><Youtube className="h-4 w-4" /></SocialIcon>
+              </div>
+              <Link
+                href={studioLink}
+                className="inline-flex items-center gap-3 border border-[#d6b26e]/60 px-6 py-3 text-[11px] uppercase tracking-[0.35em] text-[#d6b26e] transition-colors hover:bg-[#d6b26e] hover:text-[#141210]"
+              >
+                {signedIn ? "Open studio" : "Studio login"} <ArrowRight className="h-4 w-4" />
+              </Link>
             </motion.div>
-        )}
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
+
+/* ================= HERO ================= */
+function Hero() {
+  const [index, setIndex] = useState(0);
+  const ref = useRef<HTMLElement>(null);
+  const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });
+  const contentY = useTransform(scrollYProgress, [0, 1], ["0%", "40%"]);
+  const contentOpacity = useTransform(scrollYProgress, [0, 0.7], [1, 0]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setIndex((i) => (i + 1) % HERO_SLIDES.length), SLIDE_MS);
+    return () => clearTimeout(timer);
+  }, [index]);
+
+  const go = (step: number) => setIndex((i) => (i + step + HERO_SLIDES.length) % HERO_SLIDES.length);
+  const slide = HERO_SLIDES[index];
+
+  return (
+    <section id="top" ref={ref} className="relative h-[100svh] min-h-[560px] overflow-hidden bg-[#141210]">
+      <AnimatePresence initial={false}>
+        <motion.div
+          key={index}
+          className="absolute inset-0"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 1.6, ease: "easeInOut" }}
+        >
+          <img src={slide.image} alt="" className="site-kenburns h-full w-full object-cover" />
+        </motion.div>
       </AnimatePresence>
 
-      <div className="flex h-screen w-full bg-zinc-50 dark:bg-black text-zinc-900 dark:text-white overflow-hidden font-sans selection:bg-indigo-500/30 transition-colors duration-300">
-        
-        {/* ================= LEFT PANEL: The Tool Interface ================= */}
-        <div className="w-full lg:w-[480px] xl:w-[550px] h-full flex flex-col z-20 bg-white dark:bg-zinc-950 border-r border-zinc-200 dark:border-zinc-800 shadow-2xl overflow-y-auto transition-colors duration-300">
-          
-          <div className="min-h-full flex flex-col justify-between p-6 lg:p-10 xl:p-12">
-              
-              {/* Header / Logo & Theme Toggle */}
-              <div className="flex items-center justify-between mb-8 lg:mb-0">
-                <div className="flex items-center gap-3">
-                  <div className="bg-zinc-900 dark:bg-white text-white dark:text-black p-2 rounded-lg shadow-lg">
-                    <Aperture className="h-6 w-6" />
-                  </div>
-                  <span className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-white">Sevai</span>
-                </div>
+      <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/20 to-black/70" />
+      <Grain />
+      <Bokeh count={16} />
 
-                <button 
-                  onClick={toggleTheme}
-                  className="p-2 rounded-full bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors"
-                  title={theme === 'dark' ? "Switch to Light Mode" : "Switch to Dark Mode"}
-                >
-                  {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-                </button>
-              </div>
+      <motion.div
+        style={{ y: contentY, opacity: contentOpacity }}
+        className="relative z-10 flex h-full flex-col items-center justify-center px-6 text-center text-white [text-shadow:0_2px_24px_rgba(0,0,0,0.55)]"
+      >
+        <AnimatePresence mode="wait">
+          <motion.div key={index} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.5 }}>
+            <motion.p
+              className={`${eyebrow} text-white/70`}
+              initial={{ opacity: 0, letterSpacing: "0.8em" }}
+              animate={{ opacity: 1, letterSpacing: "0.4em" }}
+              transition={{ duration: 1.4, delay: 0.3, ease: EASE }}
+            >
+              {STUDIO.name} · {STUDIO.tagline}
+            </motion.p>
+            <LetterHeading
+              as="h1"
+              text={slide.title}
+              className="mt-6 font-serif text-5xl font-light uppercase tracking-[0.15em] sm:text-8xl sm:tracking-[0.3em] lg:text-9xl"
+            />
+            <motion.p
+              className="mt-6 font-serif text-xl italic text-white/85 sm:text-2xl"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 1, delay: 0.7, ease: EASE }}
+            >
+              {slide.subtitle}
+            </motion.p>
+          </motion.div>
+        </AnimatePresence>
 
-              {/* Main Form Area */}
-              <div className="flex flex-col gap-6 lg:gap-8 my-auto">
-                <motion.div 
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5 }}
-                >
-                  <h1 className="text-3xl lg:text-4xl font-bold tracking-tight mb-3 text-zinc-900 dark:text-white">
-                    Manage your <br/>
-                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-purple-500 dark:from-indigo-400 dark:to-purple-400">
-                      creative business.
-                    </span>
-                  </h1>
-                  <p className="text-zinc-500 dark:text-zinc-400 text-base lg:text-lg">
-                    Welcome back. Please enter your details.
-                  </p>
-                </motion.div>
+        <motion.a
+          href="#contact"
+          className="group mt-12 inline-flex items-center gap-3 border border-white/50 px-8 py-4 text-[11px] uppercase tracking-[0.4em] backdrop-blur-sm transition-colors hover:border-white hover:bg-white hover:text-stone-900"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 2.4, duration: 1 }}
+        >
+          Book your date <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+        </motion.a>
+      </motion.div>
 
-                {loginError && (
-                  <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-700 rounded-lg p-3">
-                    <p className="text-red-600 dark:text-red-300 text-sm">{loginError}</p>
-                    <p className="text-red-500 dark:text-red-400 text-xs mt-1">
-                      Using: Email: {formData.email}
-                    </p>
-                  </div>
-                )}
+      {/* Socials on the left edge */}
+      <div className="absolute bottom-10 left-5 z-10 hidden flex-col items-center gap-5 text-white/70 sm:flex sm:left-10">
+        <a href={STUDIO.instagram} target="_blank" rel="noreferrer" className="hover:text-white"><Instagram className="h-4 w-4" /></a>
+        <a href={STUDIO.youtube} target="_blank" rel="noreferrer" className="hover:text-white"><Youtube className="h-4 w-4" /></a>
+        <span className="h-16 w-px bg-white/40" />
+      </div>
 
-                <form onSubmit={handleLogin} className="space-y-5">
-                  <div className="space-y-2">
-                    <Label htmlFor="email" className="text-zinc-600 dark:text-zinc-300">Email Address</Label>
-                    <Input
-                      id="email"
-                      name="email"
-                      type="email"
-                      placeholder="you@sevai.com"
-                      value={formData.email}
-                      onChange={handleInputChange}
-                      className="bg-zinc-50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 focus-visible:ring-indigo-500 text-zinc-900 dark:text-white h-12 rounded-lg transition-all hover:bg-zinc-100 dark:hover:bg-zinc-900 placeholder:text-zinc-400 dark:placeholder:text-zinc-600"
-                      required
-                      disabled={isLoading || showSuccess}
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <Label htmlFor="password" className="text-zinc-600 dark:text-zinc-300">Password</Label>
-                      <button
-                        type="button"
-                        onClick={() => setLoginError(null)}
-                        className="text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 dark:hover:text-indigo-300 transition-colors"
-                      >
-                        Forgot?
-                      </button>
-                    </div>
-                    <div className="relative">
-                      <Input
-                        id="password"
-                        name="password"
-                        type={showPassword ? "text" : "password"}
-                        placeholder="••••••••"
-                        value={formData.password}
-                        onChange={handleInputChange}
-                        className="bg-zinc-50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 focus-visible:ring-indigo-500 text-zinc-900 dark:text-white h-12 rounded-lg pr-10 transition-all hover:bg-zinc-100 dark:hover:bg-zinc-900 placeholder:text-zinc-400 dark:placeholder:text-zinc-600"
-                        required
-                        disabled={isLoading || showSuccess}
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-3 text-zinc-400 dark:text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors"
-                        disabled={isLoading || showSuccess}
-                      >
-                        {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                      </button>
-                    </div>
-                  </div>
-
-                  <Button
-                    type="submit"
-                    className={`w-full h-12 text-white dark:text-black font-semibold text-base transition-all rounded-lg mt-2 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed
-                    ${showSuccess 
-                        ? "bg-emerald-500 hover:bg-emerald-600 dark:bg-emerald-400" 
-                        : "bg-zinc-900 hover:bg-zinc-800 dark:bg-white dark:hover:bg-zinc-200"
-                    }`}
-                    disabled={isLoading || showSuccess}
-                  >
-                    {isLoading || showSuccess ? (
-                      <div className="flex items-center justify-center gap-2">
-                         {showSuccess ? (
-                             <>
-                                <CheckCircle className="h-5 w-5 animate-bounce" />
-                                <span>Success!</span>
-                             </>
-                         ) : (
-                             <>
-                                <div className="h-4 w-4 border-2 border-zinc-400 border-t-transparent rounded-full animate-spin" />
-                                <span>Signing In...</span>
-                             </>
-                         )}
-                      </div>
-                    ) : (
-                      <span className="flex items-center justify-center gap-2">
-                        Sign In <ArrowRight className="h-4 w-4" />
-                      </span>
-                    )}
-                  </Button>
-                </form>
-
-                <div className="relative my-2">
-                  <div className="absolute inset-0 flex items-center"><Separator className="bg-zinc-200 dark:bg-zinc-800" /></div>
-                  <div className="relative flex justify-center"><span className="bg-white dark:bg-zinc-950 px-2 text-xs uppercase text-zinc-400 dark:text-zinc-500">Or</span></div>
-                </div>
-
-                <Button 
-                  variant="outline" 
-                  className="w-full h-12 border-zinc-200 dark:border-zinc-800 bg-transparent text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-900 hover:text-zinc-900 dark:hover:text-white rounded-lg transition-all"
-                  disabled={isLoading || showSuccess}
-                >
-                  <svg className="mr-2 h-5 w-5" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.84.01.01z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
-                  Continue with Google
-                </Button>
-
-              </div>
-
-              {/* Footer */}
-              <p className="text-zinc-500 text-sm mt-8 lg:mt-0 text-center lg:text-left">
-                Don&apos;t have an account? <a href="#" className="text-zinc-900 dark:text-white font-medium hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Sign up for free</a>
-              </p>
-          </div>
+      {/* Slide controls */}
+      <div className="absolute bottom-10 right-5 z-10 flex items-center gap-5 text-white sm:right-10">
+        <button onClick={() => go(-1)} className="rounded-full border border-white/30 p-2 hover:bg-white/10" aria-label="Previous slide">
+          <ChevronLeft className="h-4 w-4" />
+        </button>
+        <div className="flex items-center gap-2">
+          {HERO_SLIDES.map((_, i) => (
+            <button key={i} onClick={() => setIndex(i)} className="relative h-px w-10 overflow-hidden bg-white/30" aria-label={`Slide ${i + 1}`}>
+              {i === index && (
+                <motion.span
+                  className="absolute inset-y-0 left-0 bg-white"
+                  initial={{ width: "0%" }}
+                  animate={{ width: "100%" }}
+                  transition={{ duration: SLIDE_MS / 1000, ease: "linear" }}
+                />
+              )}
+            </button>
+          ))}
         </div>
+        <span className="font-serif text-sm tracking-widest">
+          0{index + 1} / 0{HERO_SLIDES.length}
+        </span>
+        <button onClick={() => go(1)} className="rounded-full border border-white/30 p-2 hover:bg-white/10" aria-label="Next slide">
+          <ChevronRight className="h-4 w-4" />
+        </button>
+      </div>
 
-        {/* ================= RIGHT PANEL: Infinite Parallax Gallery ================= */}
-        <div className="hidden lg:flex flex-1 relative overflow-hidden bg-zinc-50 dark:bg-black items-center justify-center transition-colors duration-300">
-          
-          {/* Gradient Overlay to fade edges (Adapts to theme) */}
-          <div className="absolute inset-0 bg-gradient-to-t from-zinc-50 via-transparent to-zinc-50 dark:from-black dark:via-transparent dark:to-black z-10 pointer-events-none transition-colors duration-300" />
-          <div className="absolute inset-0 bg-gradient-to-l from-zinc-50 via-transparent to-transparent dark:from-black dark:via-transparent dark:to-transparent z-10 pointer-events-none transition-colors duration-300" />
+      {/* Scroll cue */}
+      <a href="#about" className="absolute bottom-8 left-1/2 z-10 hidden -translate-x-1/2 flex-col items-center gap-3 text-white/70 md:flex">
+        <span className="text-[10px] uppercase tracking-[0.4em]">Scroll</span>
+        <span className="relative h-12 w-px overflow-hidden bg-white/20">
+          <motion.span
+            className="absolute inset-x-0 top-0 h-1/2 bg-white"
+            animate={{ y: ["-100%", "200%"] }}
+            transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
+          />
+        </span>
+      </a>
+    </section>
+  );
+}
 
-          {/* The Grid Container */}
-          <div className="grid grid-cols-3 gap-6 transform -rotate-6 scale-110 opacity-60 grayscale hover:grayscale-0 transition-all duration-700 ease-in-out">
-            
-            {/* Column 1: Moves UP */}
-            <div className="flex flex-col gap-6">
-              <InfiniteLoop direction="up" duration={45}>
-                {galleryImages[0].map((src, i) => (
-                   <GalleryImage key={i} src={src} />
-                ))}
-              </InfiniteLoop>
-            </div>
-
-            {/* Column 2: Moves DOWN (Slower) */}
-            <div className="flex flex-col gap-6 pt-20">
-               <InfiniteLoop direction="down" duration={55}>
-                {galleryImages[1].map((src, i) => (
-                   <GalleryImage key={i} src={src} />
-                ))}
-              </InfiniteLoop>
-            </div>
-
-            {/* Column 3: Moves UP */}
-            <div className="flex flex-col gap-6">
-               <InfiniteLoop direction="up" duration={50}>
-                {galleryImages[2].map((src, i) => (
-                   <GalleryImage key={i} src={src} />
-                ))}
-              </InfiniteLoop>
-            </div>
-
-          </div>
-
-          {/* Content Overlay on Right Side */}
-          <div className="absolute bottom-12 right-12 z-20 text-right max-w-md pointer-events-none select-none">
-            <p className="text-zinc-900/80 dark:text-white/80 text-xl font-light italic leading-relaxed">
-              &quot;Sevai transformed how I deliver galleries to my clients. It&apos;s simply beautiful.&quot;
+/* ================= ABOUT ================= */
+function About() {
+  return (
+    <section id="about" className="relative overflow-hidden py-16 sm:py-24">
+      <div className="mx-auto grid max-w-[1400px] items-center gap-10 px-5 sm:px-10 lg:grid-cols-2 lg:gap-16">
+        <div>
+          <Reveal>
+            <p className={`${eyebrow} text-[#b8935a]`}>Welcome to {STUDIO.name}</p>
+          </Reveal>
+          <LetterHeading
+            text="Wedding Photography & Cinematography"
+            className={`${display} mt-6 text-3xl leading-[1.25] text-stone-800 sm:text-5xl`}
+          />
+          <Reveal delay={0.3}>
+            <p className="mt-8 max-w-xl font-serif text-xl italic leading-relaxed text-stone-500">
+              We are a team of photographers and filmmakers who believe the best pictures are the ones you feel. We stay quiet,
+              watch closely and capture your day as it truly happened — the laughter, the nerves and the little moments in between.
             </p>
-            <p className="text-indigo-600 dark:text-indigo-400 mt-4 font-medium tracking-wide">— Sarah J., Wedding Photographer</p>
-          </div>
-
+          </Reveal>
+          <Reveal delay={0.45}>
+            <a
+              href="#stories"
+              className="group mt-10 inline-flex items-center gap-4 text-[11px] uppercase tracking-[0.4em] text-stone-800"
+            >
+              <span className="h-px w-12 bg-[#b8935a] transition-all duration-500 group-hover:w-20" />
+              See our stories
+            </a>
+          </Reveal>
         </div>
+
+        <div className="relative h-[520px] sm:h-[640px]">
+          <RevealImage src={STORIES[0].image} alt="Wedding couple" className="absolute right-0 top-0 h-[80%] w-[72%]" />
+          <RevealImage src={PORTFOLIO[0]} alt="Bride portrait" className="absolute bottom-0 left-0 h-[52%] w-[46%] border-[10px] border-[#f5f1ec]" />
+          <div className="absolute -left-2 top-10 hidden text-[#b8935a] lg:block">
+            <DrawLine className="h-40" />
+          </div>
+          <motion.div
+            className="absolute bottom-10 right-4 font-serif text-[120px] font-light leading-none text-[#b8935a]/15 sm:text-[160px]"
+            initial={{ opacity: 0, x: 40 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 1.4, ease: EASE }}
+          >
+            {STUDIO.name}
+          </motion.div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ================= MARQUEE ================= */
+function Marquee() {
+  const items = [...MARQUEE, ...MARQUEE];
+  return (
+    <div className="overflow-hidden border-y border-stone-300/60 bg-[#efe9e1] py-5">
+      <div className="site-marquee flex w-max items-center gap-12 whitespace-nowrap">
+        {items.map((item, i) => (
+          <span key={i} className="flex items-center gap-12">
+            <span
+              className={`font-serif text-5xl font-light uppercase tracking-[0.15em] sm:text-7xl ${
+                i % 2 ? "text-stone-800" : "text-transparent [-webkit-text-stroke:1px_#a8a29e]"
+              }`}
+            >
+              {item}
+            </span>
+            <span className="text-2xl text-[#b8935a]">✦</span>
+          </span>
+        ))}
       </div>
     </div>
   );
 }
 
-// --- Helper Components ---
-
-function GalleryImage({ src }: { src: string }) {
+/* ================= STORIES ================= */
+function Stories() {
   return (
-    <div className="relative w-64 h-80 overflow-hidden rounded-xl bg-zinc-200 dark:bg-zinc-900 border border-zinc-200 dark:border-white/5 shadow-2xl shrink-0">
-      <Image 
-        src={src} 
-        alt="Photography portfolio" 
-        fill 
-        className="object-cover opacity-60 hover:opacity-100 hover:scale-110 transition-all duration-700 ease-out" 
-        sizes="300px"
-        priority={false}
-      />
-    </div>
+    <section id="stories" className="bg-white py-16 sm:py-24">
+      <div className="mx-auto max-w-[1400px] px-5 sm:px-10">
+        <div className="text-center">
+          <Reveal>
+            <p className={`${eyebrow} text-[#b8935a]`}>Love stories</p>
+          </Reveal>
+          <LetterHeading text="Our Wedding Stories" className={`${display} mt-5 text-3xl text-stone-800 sm:text-5xl`} />
+          <Reveal delay={0.2}>
+            <p className="mx-auto mt-6 max-w-2xl font-serif text-xl italic text-stone-500">
+              Live your magic — we will keep the memories. A few of the couples who let us be part of their day.
+            </p>
+          </Reveal>
+        </div>
+
+        <div className="mt-12 grid gap-x-10 gap-y-14 md:grid-cols-2">
+          {STORIES.map((story, i) => (
+            <Reveal key={story.names} delay={(i % 2) * 0.15}>
+              <a href="#portfolio" className="group block">
+                <div className="overflow-hidden">
+                  <RevealImage
+                    src={story.image}
+                    alt={story.names}
+                    className="aspect-[1/1] w-full"
+                    imgClassName="transition-transform duration-[1.6s] ease-out group-hover:scale-110"
+                  />
+                </div>
+                <div className="mt-6 flex items-end justify-between gap-4">
+                  <div>
+                    <p className={`${eyebrow} text-stone-400`}>{story.place}</p>
+                    <h3 className="mt-2 font-serif text-3xl font-light uppercase tracking-[0.12em] text-stone-800 transition-colors group-hover:text-[#b8935a]">
+                      {story.names}
+                    </h3>
+                  </div>
+                  <span className="mb-2 h-px w-12 bg-stone-300 transition-all duration-500 group-hover:w-20 group-hover:bg-[#b8935a]" />
+                </div>
+              </a>
+            </Reveal>
+          ))}
+        </div>
+      </div>
+    </section>
   );
 }
 
-function InfiniteLoop({ children, direction = "up", duration = 20 }: { 
-  children: React.ReactNode, 
-  direction?: "up" | "down", 
-  duration?: number 
-}) {
+/* ================= COUNTERS ================= */
+function Counters() {
   return (
-    <div className="relative flex flex-col gap-6 h-full overflow-hidden">
-      <motion.div
-        animate={{ y: direction === "up" ? [0, -2000] : [-2000, 0] }}
-        transition={{
-          duration: duration,
-          repeat: Infinity,
-          ease: "linear",
-        }}
-        className="flex flex-col gap-6"
-      >
-        {children}
-        {children}
-        {children}
-        {children}
-      </motion.div>
-    </div>
+    <section className="bg-[#f5f1ec] py-14 sm:py-20">
+      <div className="mx-auto grid max-w-[1200px] grid-cols-2 gap-y-10 px-5 sm:px-10 lg:grid-cols-4">
+        {COUNTERS.map((c, i) => (
+          <Reveal key={c.label} delay={i * 0.12} className="relative flex h-32 items-center justify-center text-center">
+            <span className="absolute inset-0 flex items-center justify-center font-serif text-[90px] font-light leading-none text-[#b8935a]/20 sm:text-[120px]">
+              <Counter value={c.value} suffix={c.suffix} />
+            </span>
+            <span className="relative max-w-[10rem] text-[11px] font-medium uppercase tracking-[0.35em] text-stone-600">{c.label}</span>
+          </Reveal>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+/* ================= PORTFOLIO ================= */
+function Portfolio() {
+  const [open, setOpen] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (open === null) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(null);
+      if (e.key === "ArrowRight") setOpen((i) => (i === null ? i : (i + 1) % PORTFOLIO.length));
+      if (e.key === "ArrowLeft") setOpen((i) => (i === null ? i : (i - 1 + PORTFOLIO.length) % PORTFOLIO.length));
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open]);
+
+  return (
+    <section id="portfolio" className="relative overflow-hidden bg-[#141210] py-16 text-white sm:py-24">
+      <ParallaxBackdrop src={PARALLAX_BACKDROP} className="opacity-25 grayscale" />
+      <div className="absolute inset-0 bg-gradient-to-b from-[#141210] via-transparent to-[#141210]" />
+      <Grain />
+      <Bokeh count={12} tone="white" />
+
+      <div className="relative mx-auto max-w-[1200px] px-5 sm:px-10">
+        <div className="text-center">
+          <Reveal>
+            <p className={`${eyebrow} text-[#d6b26e]`}>Portfolio</p>
+          </Reveal>
+          <LetterHeading text="Photography" className={`${display} mt-5 text-4xl sm:text-7xl`} />
+          <Reveal delay={0.2}>
+            <span className="mx-auto mt-6 block h-px w-24 bg-[#d6b26e]/70" />
+          </Reveal>
+        </div>
+
+        <div className="mt-10 grid grid-cols-2 gap-2 sm:gap-3 md:grid-cols-3">
+          {PORTFOLIO.map((src, i) => (
+            <motion.button
+              key={src}
+              onClick={() => setOpen(i)}
+              className={`group relative overflow-hidden ${i === 0 || i === 4 ? "row-span-2" : ""}`}
+              initial={{ opacity: 0, scale: 0.92 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true, margin: "-60px" }}
+              transition={{ duration: 1, delay: (i % 3) * 0.12, ease: EASE }}
+            >
+              <img
+                src={src}
+                alt={`Portfolio photo ${i + 1}`}
+                loading="lazy"
+                className={`h-full w-full object-cover transition-all duration-[1.2s] ease-out group-hover:scale-110 group-hover:brightness-75 ${
+                  i === 0 || i === 4 ? "aspect-[3/4] md:aspect-auto" : "aspect-square"
+                }`}
+              />
+              <span className="absolute inset-3 flex items-center justify-center border border-white/0 transition-all duration-700 group-hover:border-white/60">
+                <span className="translate-y-3 text-[10px] uppercase tracking-[0.4em] opacity-0 transition-all duration-700 group-hover:translate-y-0 group-hover:opacity-100">
+                  View
+                </span>
+              </span>
+            </motion.button>
+          ))}
+        </div>
+      </div>
+
+      <AnimatePresence>
+        {open !== null && (
+          <motion.div
+            className="fixed inset-0 z-[60] flex items-center justify-center bg-black/95 p-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setOpen(null)}
+          >
+            <AnimatePresence mode="wait">
+              <motion.img
+                key={open}
+                src={PORTFOLIO[open].replace("w=900", "w=2000")}
+                alt=""
+                className="max-h-[88vh] max-w-full object-contain"
+                initial={{ opacity: 0, scale: 0.96 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.96 }}
+                transition={{ duration: 0.45, ease: EASE }}
+                onClick={(e) => e.stopPropagation()}
+              />
+            </AnimatePresence>
+            <button className="absolute right-5 top-5 p-2 text-white/70 hover:text-white" aria-label="Close">
+              <X className="h-6 w-6" />
+            </button>
+            <button
+              className="absolute left-3 top-1/2 -translate-y-1/2 p-3 text-white/70 hover:text-white"
+              onClick={(e) => {
+                e.stopPropagation();
+                setOpen((open - 1 + PORTFOLIO.length) % PORTFOLIO.length);
+              }}
+              aria-label="Previous photo"
+            >
+              <ChevronLeft className="h-8 w-8" />
+            </button>
+            <button
+              className="absolute right-3 top-1/2 -translate-y-1/2 p-3 text-white/70 hover:text-white"
+              onClick={(e) => {
+                e.stopPropagation();
+                setOpen((open + 1) % PORTFOLIO.length);
+              }}
+              aria-label="Next photo"
+            >
+              <ChevronRight className="h-8 w-8" />
+            </button>
+            <span className="absolute bottom-6 font-serif text-sm tracking-widest text-white/60">
+              {open + 1} / {PORTFOLIO.length}
+            </span>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </section>
+  );
+}
+
+/* ================= SERVICES ================= */
+function Services() {
+  return (
+    <section id="services" className="bg-[#f5f1ec] py-16 sm:py-24">
+      <div className="mx-auto max-w-[1400px] px-5 sm:px-10">
+        <div className="flex flex-col justify-between gap-8 lg:flex-row lg:items-end">
+          <div>
+            <Reveal>
+              <p className={`${eyebrow} text-[#b8935a]`}>What we do</p>
+            </Reveal>
+            <LetterHeading text="Our Services" className={`${display} mt-5 text-3xl text-stone-800 sm:text-5xl`} />
+          </div>
+          <Reveal delay={0.2}>
+            <p className="max-w-md font-serif text-xl italic text-stone-500">
+              From intimate ceremonies to grand celebrations, every story gets the same care.
+            </p>
+          </Reveal>
+        </div>
+
+        <div className="mt-10 grid gap-px bg-stone-300/60 sm:grid-cols-2 lg:grid-cols-3">
+          {SERVICES.map((service, i) => (
+            <Reveal key={service.title} delay={(i % 3) * 0.1} className="bg-[#f5f1ec]">
+              <div className="group relative h-full overflow-hidden p-8 sm:p-10">
+                {/* Photo slides up behind the text on hover */}
+                <img
+                  src={service.image}
+                  alt=""
+                  loading="lazy"
+                  className="absolute inset-0 h-full w-full translate-y-full object-cover transition-transform duration-700 ease-out group-hover:translate-y-0 [@media(hover:none)]:translate-y-0"
+                />
+                <div className="absolute inset-0 translate-y-full bg-black/55 transition-transform duration-700 ease-out group-hover:translate-y-0 [@media(hover:none)]:translate-y-0" />
+
+                <div className="relative">
+                  <span className="font-serif text-5xl font-light text-[#b8935a]/50 transition-colors duration-500 group-hover:text-[#d6b26e] [@media(hover:none)]:text-[#d6b26e]">
+                    0{i + 1}
+                  </span>
+                  <h3 className="mt-10 font-serif text-2xl uppercase tracking-[0.12em] text-stone-800 transition-colors duration-500 group-hover:text-white [@media(hover:none)]:text-white">
+                    {service.title}
+                  </h3>
+                  <p className="mt-4 leading-relaxed text-stone-500 transition-colors duration-500 group-hover:text-white/80 [@media(hover:none)]:text-white/80">{service.text}</p>
+                  <a
+                    href="#contact"
+                    className="mt-8 inline-flex items-center gap-3 text-[10px] uppercase tracking-[0.35em] text-stone-700 transition-colors duration-500 group-hover:text-white [@media(hover:none)]:text-white"
+                  >
+                    Enquire <ArrowRight className="h-3.5 w-3.5" />
+                  </a>
+                </div>
+              </div>
+            </Reveal>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ================= ONLINE GALLERIES ================= */
+function Galleries() {
+  const ref = useRef<HTMLElement>(null);
+  const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
+  const rotate = useTransform(scrollYProgress, [0, 1], [-10, 6]);
+  const y = useTransform(scrollYProgress, [0, 1], [80, -80]);
+
+  const features = [
+    { icon: QrCode, title: "Scan at the venue", text: "Guests scan a QR code and your gallery opens on their phone." },
+    { icon: ScanFace, title: "Find your own photos", text: "One selfie, and the gallery shows every photo you appear in." },
+    { icon: Download, title: "Full-quality downloads", text: "Photos and films saved straight from a private gallery." },
+  ];
+
+  return (
+    <section ref={ref} className="relative overflow-hidden bg-[#1b1815] py-16 text-white sm:py-24">
+      <Bokeh count={20} />
+      <div className="relative mx-auto grid max-w-[1300px] items-center gap-14 px-5 sm:px-10 lg:grid-cols-2">
+        <div>
+          <Reveal>
+            <p className={`${eyebrow} text-[#d6b26e]`}>Online galleries</p>
+          </Reveal>
+          <LetterHeading text="Delivered Beautifully" className={`${display} mt-5 text-3xl sm:text-5xl`} />
+          <Reveal delay={0.2}>
+            <p className="mt-6 max-w-lg font-serif text-xl italic text-white/60">
+              Every event gets its own private gallery. Share one link or QR code with family and guests — no app to install.
+            </p>
+          </Reveal>
+          <div className="mt-8 space-y-6">
+            {features.map(({ icon: Icon, title, text }, i) => (
+              <Reveal key={title} delay={0.2 + i * 0.12} className="flex gap-5">
+                <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-[#d6b26e]/40 text-[#d6b26e]">
+                  <Icon className="h-5 w-5" />
+                </span>
+                <div>
+                  <h3 className="font-serif text-xl uppercase tracking-[0.12em]">{title}</h3>
+                  <p className="mt-1 text-sm text-white/55">{text}</p>
+                </div>
+              </Reveal>
+            ))}
+          </div>
+        </div>
+
+        {/* Phone mock-up that tilts as you scroll */}
+        <motion.div style={{ rotate, y }} className="relative mx-auto w-full max-w-[320px]">
+          <div className="absolute -inset-10 rounded-full bg-[#d6b26e]/20 blur-3xl" />
+          <div className="relative rounded-[2.8rem] border border-white/15 bg-[#0d0c0b] p-3 shadow-2xl">
+            <div className="overflow-hidden rounded-[2.2rem] bg-[#f5f1ec] text-stone-800">
+              <div className="relative h-44">
+                <img src={STORIES[2].image.replace("w=1000", "w=700")} alt="" className="h-full w-full object-cover" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
+                <div className="absolute bottom-4 left-4 text-white">
+                  <p className="text-[9px] uppercase tracking-[0.35em] opacity-80">{STUDIO.name} presents</p>
+                  <p className="font-serif text-xl">{STORIES[2].names}</p>
+                </div>
+              </div>
+              <div className="flex items-center justify-between px-4 py-3">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-stone-900 px-3 py-1.5 text-[10px] font-medium uppercase tracking-wider text-white">
+                  <ScanFace className="h-3.5 w-3.5" /> Find my photos
+                </span>
+                <span className="text-[10px] uppercase tracking-wider text-stone-500">248 photos</span>
+              </div>
+              <div className="grid grid-cols-3 gap-0.5 px-0.5 pb-0.5">
+                {PORTFOLIO.slice(1, 7).map((src) => (
+                  <img key={src} src={src.replace("w=900", "w=300")} alt="" loading="lazy" className="aspect-square w-full object-cover" />
+                ))}
+              </div>
+            </div>
+          </div>
+        </motion.div>
+      </div>
+    </section>
+  );
+}
+
+/* ================= PLANS ================= */
+function Plans() {
+  return (
+    <section id="plans" className="bg-white py-16 sm:py-24">
+      <div className="mx-auto max-w-[1200px] px-5 sm:px-10">
+        <div className="text-center">
+          <Reveal>
+            <p className={`${eyebrow} text-[#b8935a]`}>Packages</p>
+          </Reveal>
+          <LetterHeading text="Pricing Plans" className={`${display} mt-5 text-3xl text-stone-800 sm:text-5xl`} />
+          <Reveal delay={0.2}>
+            <p className="mt-5 font-serif text-xl italic text-stone-500">Choose the package that fits your story</p>
+          </Reveal>
+        </div>
+
+        <div className="mt-10 grid items-center gap-8 md:grid-cols-3">
+          {PLANS.map((plan, i) => (
+            <Reveal key={plan.name} delay={i * 0.15}>
+              <motion.div
+                whileHover={{ y: -10 }}
+                transition={{ duration: 0.5, ease: EASE }}
+                className={`relative border px-8 py-12 text-center ${
+                  plan.featured ? "border-[#b8935a] bg-[#141210] text-white md:py-16" : "border-stone-200 bg-white text-stone-800"
+                }`}
+              >
+                {plan.featured && (
+                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#b8935a] px-4 py-1 text-[9px] uppercase tracking-[0.35em] text-white">
+                    Most loved
+                  </span>
+                )}
+                <h3 className="font-serif text-2xl uppercase tracking-[0.25em]">{plan.name}</h3>
+                <p className={`mt-2 text-xs uppercase tracking-[0.25em] ${plan.featured ? "text-white/50" : "text-stone-400"}`}>{plan.text}</p>
+                <p className={`mt-8 font-serif text-5xl italic ${plan.featured ? "text-[#d6b26e]" : "text-stone-500"}`}>Discuss</p>
+                <ul className={`mt-8 space-y-3 text-sm ${plan.featured ? "text-white/70" : "text-stone-500"}`}>
+                  {plan.features.map((f) => (
+                    <li key={f}>{f}</li>
+                  ))}
+                </ul>
+                <a
+                  href="#contact"
+                  className={`mt-10 inline-block border px-8 py-3 text-[10px] uppercase tracking-[0.35em] transition-colors ${
+                    plan.featured
+                      ? "border-[#d6b26e] text-[#d6b26e] hover:bg-[#d6b26e] hover:text-[#141210]"
+                      : "border-stone-800 text-stone-800 hover:bg-stone-800 hover:text-white"
+                  }`}
+                >
+                  Enquire now
+                </a>
+              </motion.div>
+            </Reveal>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ================= CONTACT ================= */
+function Contact() {
+  const [form, setForm] = useState({ name: "", phone: "", date: "", event: "Wedding", message: "" });
+  const set = (key: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
+    setForm((f) => ({ ...f, [key]: e.target.value }));
+
+  // No backend yet: the enquiry opens WhatsApp with everything filled in
+  const send = (e: React.FormEvent) => {
+    e.preventDefault();
+    const lines = [
+      `Hi ${STUDIO.name}, I'd like to book a shoot.`,
+      `Name: ${form.name}`,
+      form.phone && `Phone: ${form.phone}`,
+      `Event: ${form.event}`,
+      form.date && `Date: ${form.date}`,
+      form.message && `Details: ${form.message}`,
+    ].filter(Boolean);
+    window.open(`https://wa.me/${STUDIO.whatsapp}?text=${encodeURIComponent(lines.join("\n"))}`, "_blank", "noopener");
+  };
+
+  const field =
+    "w-full border-0 border-b border-white/25 bg-transparent px-0 py-4 font-serif text-lg text-white placeholder:text-white/40 focus:border-[#d6b26e] focus:outline-none focus:ring-0 transition-colors";
+
+  return (
+    <section id="contact" className="relative overflow-hidden bg-[#141210] py-16 text-white sm:py-24">
+      <ParallaxBackdrop src={CONTACT_BACKDROP} className="opacity-30" />
+      <div className="absolute inset-0 bg-gradient-to-r from-[#141210] via-[#141210]/85 to-[#141210]/60" />
+      <Grain />
+
+      <div className="relative mx-auto grid max-w-[1300px] gap-14 px-5 sm:px-10 lg:grid-cols-2">
+        <div>
+          <Reveal>
+            <p className={`${eyebrow} text-[#d6b26e]`}>Contact</p>
+          </Reveal>
+          <LetterHeading text="Let's Tell Your Story" className={`${display} mt-5 text-3xl leading-tight sm:text-6xl`} />
+          <Reveal delay={0.2}>
+            <p className="mt-6 max-w-md font-serif text-xl italic text-white/60">
+              Tell us your date and venue. We&apos;ll check availability and share our packages.
+            </p>
+          </Reveal>
+
+          <div className="mt-8 space-y-5">
+            <Reveal delay={0.3}>
+              <a href={`tel:${STUDIO.phone.replace(/\s/g, "")}`} className="group flex items-center gap-5">
+                <Phone className="h-5 w-5 text-[#d6b26e]" />
+                <span className="font-serif text-2xl transition-colors group-hover:text-[#d6b26e]">{STUDIO.phone}</span>
+              </a>
+            </Reveal>
+            <Reveal delay={0.4}>
+              <a href={`mailto:${STUDIO.email}`} className="group flex items-center gap-5">
+                <Mail className="h-5 w-5 text-[#d6b26e]" />
+                <span className="font-serif text-2xl italic transition-colors group-hover:text-[#d6b26e]">{STUDIO.email}</span>
+              </a>
+            </Reveal>
+            <Reveal delay={0.5}>
+              <div className="flex items-center gap-5">
+                <MapPin className="h-5 w-5 text-[#d6b26e]" />
+                <span className="font-serif text-2xl">{STUDIO.location}</span>
+              </div>
+            </Reveal>
+          </div>
+        </div>
+
+        <Reveal delay={0.2}>
+          <form onSubmit={send} className="space-y-2">
+            <input required value={form.name} onChange={set("name")} placeholder="Your name" className={field} />
+            <input value={form.phone} onChange={set("phone")} placeholder="Phone number" type="tel" className={field} />
+            <div className="grid gap-2 sm:grid-cols-2">
+              <select value={form.event} onChange={set("event")} className={`${field} [&>option]:text-stone-900`}>
+                {SERVICES.map((s) => (
+                  <option key={s.title}>{s.title}</option>
+                ))}
+              </select>
+              <input value={form.date} onChange={set("date")} type="date" className={`${field} [color-scheme:dark]`} />
+            </div>
+            <textarea value={form.message} onChange={set("message")} placeholder="Venue, guest count, anything else" rows={3} className={`${field} resize-none`} />
+            <button
+              type="submit"
+              className="group !mt-10 inline-flex items-center gap-4 bg-[#d6b26e] px-10 py-4 text-[11px] font-medium uppercase tracking-[0.4em] text-[#141210] transition-colors hover:bg-white"
+            >
+              Send enquiry <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+            </button>
+          </form>
+        </Reveal>
+      </div>
+    </section>
+  );
+}
+
+/* ================= FOOTER ================= */
+function Footer({ studioLink, signedIn }: { studioLink: string; signedIn: boolean }) {
+  return (
+    <footer className="bg-[#0d0c0b] py-16 text-white/60">
+      <div className="mx-auto flex max-w-[1400px] flex-col items-center gap-8 px-5 text-center sm:px-10">
+        <div>
+          <p className="font-serif text-4xl tracking-[0.3em] text-[#d6b26e]">{STUDIO.name}</p>
+          <p className="mt-2 text-[9px] uppercase tracking-[0.5em]">{STUDIO.tagline}</p>
+        </div>
+        <nav className="flex flex-wrap justify-center gap-x-8 gap-y-3 text-[10px] uppercase tracking-[0.35em]">
+          {NAV.map((item) => (
+            <a key={item.href} href={item.href} className="hover:text-white">
+              {item.label}
+            </a>
+          ))}
+          <Link href={studioLink} className="text-[#d6b26e] hover:text-white">
+            {signedIn ? "Studio" : "Login"}
+          </Link>
+        </nav>
+        <div className="flex gap-4">
+          <SocialIcon href={STUDIO.instagram} label="Instagram"><Instagram className="h-4 w-4" /></SocialIcon>
+          <SocialIcon href={STUDIO.youtube} label="YouTube"><Youtube className="h-4 w-4" /></SocialIcon>
+        </div>
+        <p className="text-xs">
+          © {new Date().getFullYear()} {STUDIO.name} {STUDIO.tagline}. All rights reserved.
+        </p>
+      </div>
+    </footer>
+  );
+}
+
+function SocialIcon({ href, label, children }: { href: string; label: string; children: React.ReactNode }) {
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noreferrer"
+      aria-label={label}
+      className="flex h-10 w-10 items-center justify-center rounded-full border border-white/20 text-white/70 transition-colors hover:border-[#d6b26e] hover:text-[#d6b26e]"
+    >
+      {children}
+    </a>
+  );
+}
+
+function BackToTop({ show }: { show: boolean }) {
+  return (
+    <AnimatePresence>
+      {show && (
+        <motion.a
+          href="#top"
+          className="fixed bottom-4 right-4 z-30 flex h-10 w-10 items-center justify-center rounded-full sm:bottom-6 sm:right-6 sm:h-12 sm:w-12 bg-[#141210] text-[#d6b26e] shadow-xl hover:bg-[#b8935a] hover:text-white"
+          initial={{ opacity: 0, scale: 0.6 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.6 }}
+          aria-label="Back to top"
+        >
+          <ArrowUp className="h-4 w-4 sm:h-5 sm:w-5" />
+        </motion.a>
+      )}
+    </AnimatePresence>
+  );
+}
+
+// Floating WhatsApp chat button, bottom-left on every screen size
+function WhatsAppButton() {
+  const text = encodeURIComponent(`Hi ${STUDIO.name}, I'd like to know more about booking a shoot.`);
+  return (
+    <motion.a
+      href={`https://wa.me/${STUDIO.whatsapp}?text=${text}`}
+      target="_blank"
+      rel="noreferrer"
+      aria-label="Chat with us on WhatsApp"
+      className="group fixed bottom-4 left-4 z-30 flex items-center sm:bottom-6 sm:left-6"
+      initial={{ opacity: 0, scale: 0.5 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ delay: 2.6, duration: 0.6, ease: EASE }}
+    >
+      <span className="relative flex h-11 w-11 items-center justify-center rounded-full bg-[#25D366] sm:h-14 sm:w-14 text-white shadow-xl shadow-black/30 transition-transform group-hover:scale-110">
+        <span className="absolute inset-0 animate-ping rounded-full bg-[#25D366] opacity-40" />
+        <svg viewBox="0 0 32 32" className="relative h-5 w-5 fill-current sm:h-7 sm:w-7" aria-hidden>
+          <path d="M16.04 3C8.86 3 3.03 8.82 3.03 16c0 2.3.6 4.54 1.74 6.52L3 29l6.65-1.74A12.95 12.95 0 0 0 16.04 29C23.2 29 29 23.18 29 16S23.2 3 16.04 3Zm0 23.62c-2 0-3.96-.54-5.67-1.55l-.4-.24-3.95 1.03 1.05-3.85-.26-.4a10.6 10.6 0 0 1-1.63-5.62c0-5.86 4.78-10.63 10.67-10.63 5.87 0 10.64 4.77 10.64 10.64 0 5.86-4.77 10.62-10.45 10.62Zm5.84-7.96c-.32-.16-1.88-.93-2.17-1.04-.29-.1-.5-.16-.71.16-.21.32-.82 1.04-1 1.25-.19.21-.37.24-.69.08-.32-.16-1.35-.5-2.57-1.59-.95-.85-1.59-1.9-1.78-2.22-.18-.32-.02-.49.14-.65.14-.14.32-.37.48-.56.16-.18.21-.32.32-.53.1-.21.05-.4-.03-.56-.08-.16-.71-1.72-.98-2.35-.26-.62-.52-.53-.71-.54h-.6c-.21 0-.56.08-.85.4-.29.32-1.11 1.09-1.11 2.65 0 1.56 1.14 3.07 1.3 3.28.16.21 2.24 3.42 5.43 4.8.76.33 1.35.52 1.81.67.76.24 1.45.2 2 .12.61-.09 1.88-.77 2.14-1.51.27-.74.27-1.38.19-1.51-.08-.13-.29-.21-.61-.37Z" />
+        </svg>
+      </span>
+      <span className="pointer-events-none ml-3 -translate-x-2 whitespace-nowrap rounded-full bg-white px-4 py-2 text-xs font-medium text-stone-800 opacity-0 shadow-lg transition-all duration-300 group-hover:translate-x-0 group-hover:opacity-100">
+        Chat with us
+      </span>
+    </motion.a>
   );
 }

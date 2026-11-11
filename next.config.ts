@@ -1,24 +1,24 @@
-/** @type {import('next').NextConfig} */
-const nextConfig = {
-    images: {
-    domains: ['images.unsplash.com'], // Add your image domains here
+import type { NextConfig } from "next";
+
+const nextConfig: NextConfig = {
+  images: {
     remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: '/**', // Allow all HTTPS domains (be careful in production)
-      },
+      { protocol: "https", hostname: "images.unsplash.com" },
+      { protocol: "https", hostname: "res.cloudinary.com" },
     ],
   },
- 
+
   reactStrictMode: false,
-  eslint: {
-    // ✅ Skip ESLint errors during build
-    ignoreDuringBuilds: true,
-  },
-  typescript: {
-    // ✅ Skip TypeScript type errors during build
-    ignoreBuildErrors: true,
+  // The dev-only "N" badge sat on top of the website's WhatsApp button
+  devIndicators: false,
+
+  // Old page URLs, kept working for bookmarks
+  async redirects() {
+    return [
+      { source: "/pages/admindashboard", destination: "/dashboard", permanent: false },
+      { source: "/pages/eventmanagement", destination: "/events", permanent: false },
+    ];
   },
 };
 
-module.exports = nextConfig;
+export default nextConfig;
