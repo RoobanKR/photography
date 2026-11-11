@@ -49,7 +49,7 @@ export default function LoginPage() {
   const [showSuccess, setShowSuccess] = useState(false); // New state for success animation
   
   // Theme State
-  const [theme, setTheme] = useState("dark");
+  const [theme, setTheme] = useState("light");
   
   const router = useRouter();
   
@@ -67,8 +67,8 @@ export default function LoginPage() {
     if (savedTheme) {
       setTheme(savedTheme);
     } else {
-      setTheme("dark");
-      localStorage.setItem("theme", "dark");
+      setTheme("light");
+      localStorage.setItem("theme", "light");
     }
 
     // 2. Check Auth
@@ -159,25 +159,25 @@ export default function LoginPage() {
         )}
       </AnimatePresence>
 
-      <div className="flex h-screen w-full bg-zinc-50 dark:bg-black text-zinc-900 dark:text-white overflow-hidden font-sans selection:bg-indigo-500/30 transition-colors duration-300">
+      <div className="flex h-screen w-full bg-cream dark:bg-ink-950 text-ink-900 dark:text-white overflow-hidden font-sans selection:bg-gold-400/30 transition-colors duration-300">
         
         {/* ================= LEFT PANEL: The Tool Interface ================= */}
-        <div className="w-full lg:w-[480px] xl:w-[550px] h-full flex flex-col z-20 bg-white dark:bg-zinc-950 border-r border-zinc-200 dark:border-zinc-800 shadow-2xl overflow-y-auto transition-colors duration-300">
+        <div className="w-full lg:w-[480px] xl:w-[550px] h-full flex flex-col z-20 bg-white dark:bg-ink-950 border-r border-stone-200 dark:border-ink-800 shadow-2xl overflow-y-auto transition-colors duration-300">
           
           <div className="min-h-full flex flex-col justify-between p-6 lg:p-10 xl:p-12">
               
               {/* Header / Logo & Theme Toggle */}
               <div className="flex items-center justify-between mb-8 lg:mb-0">
                 <Link href="/" className="flex items-center gap-3" title="Back to website">
-                  <div className="bg-zinc-900 dark:bg-white text-white dark:text-black p-2 rounded-lg shadow-lg">
+                  <div className="bg-gold-500 dark:bg-gold-300 text-white dark:text-ink-950 p-2 rounded-lg shadow-lg">
                     <Aperture className="h-6 w-6" />
                   </div>
-                  <span className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-white">KR5</span>
+                  <span className="font-serif text-2xl tracking-[0.2em] text-ink-900 dark:text-gold-300">KR5</span>
                 </Link>
 
                 <button 
                   onClick={toggleTheme}
-                  className="p-2 rounded-full bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors"
+                  className="p-2 rounded-full bg-stone-100 dark:bg-ink-900 text-stone-600 dark:text-stone-400 hover:bg-stone-200 dark:hover:bg-ink-800 transition-colors"
                   title={theme === 'dark' ? "Switch to Light Mode" : "Switch to Dark Mode"}
                 >
                   {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
@@ -191,13 +191,13 @@ export default function LoginPage() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5 }}
                 >
-                  <h1 className="text-3xl lg:text-4xl font-bold tracking-tight mb-3 text-zinc-900 dark:text-white">
+                  <h1 className="font-serif text-4xl lg:text-5xl font-light tracking-tight mb-3 text-ink-900 dark:text-white">
                     Manage your <br/>
-                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-purple-500 dark:from-indigo-400 dark:to-purple-400">
+                    <span className="italic text-gold-500 dark:text-gold-300">
                       creative business.
                     </span>
                   </h1>
-                  <p className="text-zinc-500 dark:text-zinc-400 text-base lg:text-lg">
+                  <p className="text-stone-500 dark:text-stone-400 text-base lg:text-lg">
                     Welcome back. Please enter your details.
                   </p>
                 </motion.div>
@@ -213,7 +213,7 @@ export default function LoginPage() {
 
                 <form onSubmit={handleLogin} className="space-y-5">
                   <div className="space-y-2">
-                    <Label htmlFor="email" className="text-zinc-600 dark:text-zinc-300">Email Address</Label>
+                    <Label htmlFor="email" className="text-stone-600 dark:text-stone-300">Email Address</Label>
                     <Input
                       id="email"
                       name="email"
@@ -221,7 +221,7 @@ export default function LoginPage() {
                       placeholder="you@kr5.com"
                       value={formData.email}
                       onChange={handleInputChange}
-                      className="bg-zinc-50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 focus-visible:ring-indigo-500 text-zinc-900 dark:text-white h-12 rounded-lg transition-all hover:bg-zinc-100 dark:hover:bg-zinc-900 placeholder:text-zinc-400 dark:placeholder:text-zinc-600"
+                      className="bg-stone-50 dark:bg-ink-900/50 border-stone-200 dark:border-ink-800 focus-visible:ring-gold-400 text-ink-900 dark:text-white h-12 rounded-lg transition-all hover:bg-stone-100 dark:hover:bg-ink-900 placeholder:text-stone-400 dark:placeholder:text-stone-600"
                       required
                       disabled={isLoading || showSuccess}
                     />
@@ -229,11 +229,11 @@ export default function LoginPage() {
 
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
-                      <Label htmlFor="password" className="text-zinc-600 dark:text-zinc-300">Password</Label>
+                      <Label htmlFor="password" className="text-stone-600 dark:text-stone-300">Password</Label>
                       <button
                         type="button"
                         onClick={() => setLoginError(null)}
-                        className="text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 dark:hover:text-indigo-300 transition-colors"
+                        className="text-xs text-gold-500 dark:text-gold-300 hover:text-gold-400 dark:hover:text-gold-300 transition-colors"
                       >
                         Forgot?
                       </button>
@@ -246,14 +246,14 @@ export default function LoginPage() {
                         placeholder="••••••••"
                         value={formData.password}
                         onChange={handleInputChange}
-                        className="bg-zinc-50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 focus-visible:ring-indigo-500 text-zinc-900 dark:text-white h-12 rounded-lg pr-10 transition-all hover:bg-zinc-100 dark:hover:bg-zinc-900 placeholder:text-zinc-400 dark:placeholder:text-zinc-600"
+                        className="bg-stone-50 dark:bg-ink-900/50 border-stone-200 dark:border-ink-800 focus-visible:ring-gold-400 text-ink-900 dark:text-white h-12 rounded-lg pr-10 transition-all hover:bg-stone-100 dark:hover:bg-ink-900 placeholder:text-stone-400 dark:placeholder:text-stone-600"
                         required
                         disabled={isLoading || showSuccess}
                       />
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-3 text-zinc-400 dark:text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors"
+                        className="absolute right-3 top-3 text-stone-400 dark:text-stone-500 hover:text-ink-900 dark:hover:text-white transition-colors"
                         disabled={isLoading || showSuccess}
                       >
                         {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
@@ -263,10 +263,10 @@ export default function LoginPage() {
 
                   <Button
                     type="submit"
-                    className={`w-full h-12 text-white dark:text-black font-semibold text-base transition-all rounded-lg mt-2 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed
+                    className={`w-full h-12 text-white dark:text-ink-950 font-semibold text-base transition-all rounded-lg mt-2 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed
                     ${showSuccess 
                         ? "bg-emerald-500 hover:bg-emerald-600 dark:bg-emerald-400" 
-                        : "bg-zinc-900 hover:bg-zinc-800 dark:bg-white dark:hover:bg-zinc-200"
+                        : "bg-gold-500 hover:bg-gold-600 dark:bg-gold-300 dark:hover:bg-gold-400"
                     }`}
                     disabled={isLoading || showSuccess}
                   >
@@ -279,7 +279,7 @@ export default function LoginPage() {
                              </>
                          ) : (
                              <>
-                                <div className="h-4 w-4 border-2 border-zinc-400 border-t-transparent rounded-full animate-spin" />
+                                <div className="h-4 w-4 border-2 border-stone-400 border-t-transparent rounded-full animate-spin" />
                                 <span>Signing In...</span>
                              </>
                          )}
@@ -293,13 +293,13 @@ export default function LoginPage() {
                 </form>
 
                 <div className="relative my-2">
-                  <div className="absolute inset-0 flex items-center"><Separator className="bg-zinc-200 dark:bg-zinc-800" /></div>
-                  <div className="relative flex justify-center"><span className="bg-white dark:bg-zinc-950 px-2 text-xs uppercase text-zinc-400 dark:text-zinc-500">Or</span></div>
+                  <div className="absolute inset-0 flex items-center"><Separator className="bg-stone-200 dark:bg-ink-800" /></div>
+                  <div className="relative flex justify-center"><span className="bg-white dark:bg-ink-950 px-2 text-xs uppercase text-stone-400 dark:text-stone-500">Or</span></div>
                 </div>
 
                 <Button 
                   variant="outline" 
-                  className="w-full h-12 border-zinc-200 dark:border-zinc-800 bg-transparent text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-900 hover:text-zinc-900 dark:hover:text-white rounded-lg transition-all"
+                  className="w-full h-12 border-stone-200 dark:border-ink-800 bg-transparent text-stone-600 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-ink-900 hover:text-ink-900 dark:hover:text-white rounded-lg transition-all"
                   disabled={isLoading || showSuccess}
                 >
                   <svg className="mr-2 h-5 w-5" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.84.01.01z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
@@ -309,18 +309,18 @@ export default function LoginPage() {
               </div>
 
               {/* Footer */}
-              <p className="text-zinc-500 text-sm mt-8 lg:mt-0 text-center lg:text-left">
-                Don&apos;t have an account? <a href="#" className="text-zinc-900 dark:text-white font-medium hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Sign up for free</a>
+              <p className="text-stone-500 text-sm mt-8 lg:mt-0 text-center lg:text-left">
+                Don&apos;t have an account? <a href="#" className="text-ink-900 dark:text-white font-medium hover:text-gold-500 dark:hover:text-gold-300 transition-colors">Sign up for free</a>
               </p>
           </div>
         </div>
 
         {/* ================= RIGHT PANEL: Infinite Parallax Gallery ================= */}
-        <div className="hidden lg:flex flex-1 relative overflow-hidden bg-zinc-50 dark:bg-black items-center justify-center transition-colors duration-300">
+        <div className="hidden lg:flex flex-1 relative overflow-hidden bg-stone-50 dark:bg-ink-950 items-center justify-center transition-colors duration-300">
           
           {/* Gradient Overlay to fade edges (Adapts to theme) */}
-          <div className="absolute inset-0 bg-gradient-to-t from-zinc-50 via-transparent to-zinc-50 dark:from-black dark:via-transparent dark:to-black z-10 pointer-events-none transition-colors duration-300" />
-          <div className="absolute inset-0 bg-gradient-to-l from-zinc-50 via-transparent to-transparent dark:from-black dark:via-transparent dark:to-transparent z-10 pointer-events-none transition-colors duration-300" />
+          <div className="absolute inset-0 bg-gradient-to-t from-stone-50 via-transparent to-stone-50 dark:from-black dark:via-transparent dark:to-black z-10 pointer-events-none transition-colors duration-300" />
+          <div className="absolute inset-0 bg-gradient-to-l from-stone-50 via-transparent to-transparent dark:from-black dark:via-transparent dark:to-transparent z-10 pointer-events-none transition-colors duration-300" />
 
           {/* The Grid Container */}
           <div className="grid grid-cols-3 gap-6 transform -rotate-6 scale-110 opacity-60 grayscale hover:grayscale-0 transition-all duration-700 ease-in-out">
@@ -356,10 +356,10 @@ export default function LoginPage() {
 
           {/* Content Overlay on Right Side */}
           <div className="absolute bottom-12 right-12 z-20 text-right max-w-md pointer-events-none select-none">
-            <p className="text-zinc-900/80 dark:text-white/80 text-xl font-light italic leading-relaxed">
+            <p className="text-ink-900/80 dark:text-white/80 text-xl font-light italic leading-relaxed">
               &quot;KR5 transformed how I deliver galleries to my clients. It&apos;s simply beautiful.&quot;
             </p>
-            <p className="text-indigo-600 dark:text-indigo-400 mt-4 font-medium tracking-wide">— Sarah J., Wedding Photographer</p>
+            <p className="text-gold-500 dark:text-gold-300 mt-4 font-medium tracking-wide">— Sarah J., Wedding Photographer</p>
           </div>
 
         </div>
@@ -372,7 +372,7 @@ export default function LoginPage() {
 
 function GalleryImage({ src }: { src: string }) {
   return (
-    <div className="relative w-64 h-80 overflow-hidden rounded-xl bg-zinc-200 dark:bg-zinc-900 border border-zinc-200 dark:border-white/5 shadow-2xl shrink-0">
+    <div className="relative w-64 h-80 overflow-hidden rounded-xl bg-stone-200 dark:bg-ink-900 border border-stone-200 dark:border-white/5 shadow-2xl shrink-0">
       <Image 
         src={src} 
         alt="Photography portfolio" 

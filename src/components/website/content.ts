@@ -48,6 +48,7 @@ export const PORTFOLIO = [
   unsplash("1702378154233-9b870ff8f1b3", 900),
   unsplash("1589463349208-95817c91f971", 900), // marigold hangings
   unsplash("1769500810743-5e5dd4fd5848", 900),
+  unsplash("1767790693955-bb886f16dce9", 900),
 ];
 
 export const PARALLAX_BACKDROP = unsplash("1773745060497-4cc1df774c72", 2400);

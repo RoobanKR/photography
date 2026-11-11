@@ -33,12 +33,12 @@ function StatCard({ label, value, hint, icon: Icon, tone, href }: {
   href: string;
 }) {
   return (
-    <Link href={href} className="rounded-xl border border-slate-200 bg-white p-4 transition-shadow hover:shadow-md dark:border-zinc-800 dark:bg-zinc-950">
+    <Link href={href} className="rounded-xl border border-stone-200 bg-white p-4 transition-shadow hover:shadow-md dark:border-ink-800 dark:bg-ink-900">
       <div className="flex items-start justify-between">
         <div className="min-w-0">
-          <p className="text-sm font-medium text-slate-500 dark:text-zinc-400">{label}</p>
-          <p className="mt-2 truncate text-2xl font-bold tracking-tight">{value}</p>
-          {hint && <p className="mt-1 truncate text-xs text-slate-400 dark:text-zinc-500">{hint}</p>}
+          <p className="text-sm font-medium text-stone-500 dark:text-stone-400">{label}</p>
+          <p className="mt-2 truncate font-serif text-3xl font-light tracking-tight">{value}</p>
+          {hint && <p className="mt-1 truncate text-xs text-stone-400 dark:text-stone-500">{hint}</p>}
         </div>
         <div className={`rounded-lg p-2.5 ${tone}`}>
           <Icon className="h-5 w-5" />
@@ -56,10 +56,10 @@ function Panel({ title, href, linkLabel = "View all", children, className = "" }
   className?: string;
 }) {
   return (
-    <section className={`rounded-xl border border-slate-200 bg-white dark:border-zinc-800 dark:bg-zinc-950 ${className}`}>
-      <div className="flex items-center justify-between border-b border-slate-100 px-4 py-4 dark:border-zinc-900">
-        <h3 className="font-semibold">{title}</h3>
-        <Link href={href} className="flex items-center gap-1 text-sm text-blue-600 hover:underline dark:text-blue-400">
+    <section className={`rounded-xl border border-stone-200 bg-white dark:border-ink-800 dark:bg-ink-900 ${className}`}>
+      <div className="flex items-center justify-between border-b border-stone-100 px-4 py-4 dark:border-ink-900">
+        <h3 className="font-serif text-lg tracking-[0.08em] text-stone-800 dark:text-stone-100">{title}</h3>
+        <Link href={href} className="flex items-center gap-1 text-sm text-gold-500 hover:underline dark:text-gold-300">
           {linkLabel} <ArrowRight className="h-3.5 w-3.5" />
         </Link>
       </div>
@@ -69,13 +69,13 @@ function Panel({ title, href, linkLabel = "View all", children, className = "" }
 }
 
 const Empty = ({ children }: { children: React.ReactNode }) => (
-  <p className="px-4 py-10 text-center text-sm text-slate-500 dark:text-zinc-500">{children}</p>
+  <p className="px-4 py-10 text-center text-sm text-stone-500 dark:text-stone-500">{children}</p>
 );
 
 function DateBadge({ value }: { value: string }) {
   const date = new Date(value);
   return (
-    <div className="flex h-12 w-12 shrink-0 flex-col items-center justify-center rounded-lg bg-blue-50 text-blue-700 dark:bg-blue-950/50 dark:text-blue-300">
+    <div className="flex h-12 w-12 shrink-0 flex-col items-center justify-center rounded-lg bg-gold-50 text-gold-600 dark:bg-gold-500/10 dark:text-gold-300">
       <span className="text-[10px] font-bold uppercase">{date.toLocaleString(undefined, { month: "short", timeZone: "UTC" })}</span>
       <span className="text-lg font-bold leading-none">{date.getUTCDate()}</span>
     </div>
@@ -139,7 +139,7 @@ export default function DashboardPage() {
   if (loading) {
     return (
       <div className="flex h-64 items-center justify-center">
-        <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
+        <Loader2 className="h-6 w-6 animate-spin text-gold-500" />
       </div>
     );
   }
@@ -153,19 +153,19 @@ export default function DashboardPage() {
     <div className="mx-auto max-w-7xl space-y-4">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">Welcome back, {user?.name?.split(" ")[0]}</h2>
-          <p className="mt-1 text-sm text-slate-500 dark:text-zinc-400">
+          <h2 className="font-serif text-3xl font-light tracking-[0.04em] text-stone-800 dark:text-stone-100">Welcome back, {user?.name?.split(" ")[0]}</h2>
+          <p className="mt-1 text-sm text-stone-500 dark:text-stone-400">
             {new Date().toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "long" })} · here&apos;s your studio today.
           </p>
         </div>
         <div className="flex gap-2 self-start">
           {can("bookings.manage") && (
-            <Link href="/bookings" className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium hover:bg-slate-50 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:bg-zinc-800">
+            <Link href="/bookings" className="inline-flex items-center gap-2 rounded-lg border border-stone-200 bg-white px-4 py-2.5 text-sm font-medium hover:bg-cream dark:border-ink-800 dark:bg-ink-800 dark:hover:bg-ink-800">
               <CalendarCheck className="h-4 w-4" /> Bookings
             </Link>
           )}
           {can("events.create") && (
-            <Link href="/events" className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm shadow-blue-500/20 hover:bg-blue-700">
+            <Link href="/events" className="inline-flex items-center gap-2 rounded-lg bg-gold-500 px-4 py-2.5 text-sm font-semibold text-white shadow-sm shadow-gold-400/20 hover:bg-gold-600">
               <CalendarPlus className="h-4 w-4" /> New event
             </Link>
           )}
@@ -179,7 +179,7 @@ export default function DashboardPage() {
       )}
 
       {nothingToShow && (
-        <div className="rounded-xl border border-slate-200 bg-white p-4 text-sm text-slate-500 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-400">
+        <div className="rounded-xl border border-stone-200 bg-white p-4 text-sm text-stone-500 dark:border-ink-800 dark:bg-ink-900 dark:text-stone-400">
           Your role doesn&apos;t include events, bookings or storage yet. Ask your studio admin if you need access.
         </div>
       )}
@@ -193,7 +193,7 @@ export default function DashboardPage() {
               value={data.upcomingShoots.length}
               hint={`${data.enquiries.length} open enquir${data.enquiries.length === 1 ? "y" : "ies"}`}
               icon={CalendarCheck}
-              tone="bg-blue-50 text-blue-600 dark:bg-blue-950/50 dark:text-blue-400"
+              tone="bg-gold-50 text-gold-500 dark:bg-gold-500/10 dark:text-gold-300"
               href="/bookings"
             />
             <StatCard
@@ -235,16 +235,16 @@ export default function DashboardPage() {
             {data.upcomingShoots.length === 0 ? (
               <Empty>No confirmed shoots coming up.</Empty>
             ) : (
-              <ul className="divide-y divide-slate-100 dark:divide-zinc-900">
+              <ul className="divide-y divide-stone-100 dark:divide-ink-900">
                 {data.upcomingShoots.slice(0, 5).map((b) => {
                   const pay = paymentState(b);
                   return (
                     <li key={b._id}>
-                      <Link href={b.eventId ? `/events/${b.eventId}` : "/bookings"} className="flex items-center gap-4 px-4 py-3.5 hover:bg-slate-50 dark:hover:bg-zinc-900/60">
+                      <Link href={b.eventId ? `/events/${b.eventId}` : "/bookings"} className="flex items-center gap-4 px-4 py-3.5 hover:bg-cream dark:hover:bg-ink-900/60">
                         <DateBadge value={b.eventDate} />
                         <div className="min-w-0 flex-1">
                           <p className="truncate font-medium">{b.clientName}</p>
-                          <p className="truncate text-xs text-slate-500 dark:text-zinc-500">
+                          <p className="truncate text-xs text-stone-500 dark:text-stone-500">
                             {eventTypeLabel(b.eventType)}
                             {b.startTime && ` · ${formatTime(b.startTime)}`}
                             {b.eventPlace && ` · ${b.eventPlace}`}
@@ -267,16 +267,16 @@ export default function DashboardPage() {
               {data.upcomingEvents.length === 0 ? (
                 <Empty>No upcoming events.</Empty>
               ) : (
-                <ul className="divide-y divide-slate-100 dark:divide-zinc-900">
+                <ul className="divide-y divide-stone-100 dark:divide-ink-900">
                   {data.upcomingEvents.slice(0, 5).map((e) => (
                     <li key={e._id}>
-                      <Link href={`/events/${e._id}`} className="flex items-center gap-4 px-4 py-3.5 hover:bg-slate-50 dark:hover:bg-zinc-900/60">
+                      <Link href={`/events/${e._id}`} className="flex items-center gap-4 px-4 py-3.5 hover:bg-cream dark:hover:bg-ink-900/60">
                         <DateBadge value={e.eventDate} />
                         <div className="min-w-0 flex-1">
                           <p className="truncate font-medium">{e.eventName}</p>
-                          <p className="flex items-center gap-1 truncate text-xs text-slate-500 dark:text-zinc-500"><MapPin className="h-3 w-3 shrink-0" /> {e.eventPlace}</p>
+                          <p className="flex items-center gap-1 truncate text-xs text-stone-500 dark:text-stone-500"><MapPin className="h-3 w-3 shrink-0" /> {e.eventPlace}</p>
                         </div>
-                        <span className="text-xs text-slate-400">{e.mediaFiles?.length ?? 0} files</span>
+                        <span className="text-xs text-stone-400">{e.mediaFiles?.length ?? 0} files</span>
                       </Link>
                     </li>
                   ))}
@@ -292,10 +292,10 @@ export default function DashboardPage() {
             <div className="space-y-4 p-4">
               <div>
                 <div className="flex items-baseline justify-between">
-                  <p className="text-lg font-bold">{formatBytes(storage.total.bytes)}</p>
-                  <p className="text-xs text-slate-500 dark:text-zinc-400">{storageLimit ? `of ${formatBytes(storageLimit)}` : "no limit"}</p>
+                  <p className="font-serif text-2xl font-light">{formatBytes(storage.total.bytes)}</p>
+                  <p className="text-xs text-stone-500 dark:text-stone-400">{storageLimit ? `of ${formatBytes(storageLimit)}` : "no limit"}</p>
                 </div>
-                <div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-100 dark:bg-zinc-800">
+                <div className="mt-2 h-2 overflow-hidden rounded-full bg-stone-100 dark:bg-ink-800">
                   {storageLimit ? (
                     <div className={`h-full rounded-full ${usageTone(storagePct)}`} style={{ width: `${storagePct}%` }} />
                   ) : (
@@ -307,25 +307,25 @@ export default function DashboardPage() {
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-3 text-sm">
-                <div className="rounded-lg bg-slate-50 p-3 dark:bg-zinc-900">
-                  <p className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-zinc-400"><ImageIcon className="h-3.5 w-3.5 text-emerald-500" /> Photos</p>
+                <div className="rounded-lg bg-cream p-3 dark:bg-ink-800">
+                  <p className="flex items-center gap-1.5 text-xs text-stone-500 dark:text-stone-400"><ImageIcon className="h-3.5 w-3.5 text-emerald-500" /> Photos</p>
                   <p className="mt-1 font-semibold">{formatBytes(storage.total.photoBytes)}</p>
-                  <p className="text-xs text-slate-400">{storage.total.photos} files</p>
+                  <p className="text-xs text-stone-400">{storage.total.photos} files</p>
                 </div>
-                <div className="rounded-lg bg-slate-50 p-3 dark:bg-zinc-900">
-                  <p className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-zinc-400"><Video className="h-3.5 w-3.5 text-rose-500" /> Videos</p>
+                <div className="rounded-lg bg-cream p-3 dark:bg-ink-800">
+                  <p className="flex items-center gap-1.5 text-xs text-stone-500 dark:text-stone-400"><Video className="h-3.5 w-3.5 text-rose-500" /> Videos</p>
                   <p className="mt-1 font-semibold">{formatBytes(storage.total.videoBytes)}</p>
-                  <p className="text-xs text-slate-400">{storage.total.videos} files</p>
+                  <p className="text-xs text-stone-400">{storage.total.videos} files</p>
                 </div>
               </div>
               {storage.perEvent.filter((e) => e.bytes > 0).length > 0 && (
                 <div>
-                  <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-400">Largest events</p>
+                  <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-stone-400">Largest events</p>
                   <ul className="space-y-2">
                     {storage.perEvent.filter((e) => e.bytes > 0).slice(0, 3).map((e) => (
                       <li key={e.id} className="flex items-center justify-between gap-3 text-sm">
-                        <Link href={`/events/${e.id}`} className="truncate hover:text-blue-600 dark:hover:text-blue-400">{e.eventName}</Link>
-                        <span className="shrink-0 text-slate-500 dark:text-zinc-400">{formatBytes(e.bytes)}</span>
+                        <Link href={`/events/${e.id}`} className="truncate hover:text-gold-500 dark:hover:text-gold-300">{e.eventName}</Link>
+                        <span className="shrink-0 text-stone-500 dark:text-stone-400">{formatBytes(e.bytes)}</span>
                       </li>
                     ))}
                   </ul>
@@ -341,17 +341,17 @@ export default function DashboardPage() {
             {data.enquiries.length === 0 ? (
               <Empty>No open enquiries.</Empty>
             ) : (
-              <ul className="divide-y divide-slate-100 dark:divide-zinc-900">
+              <ul className="divide-y divide-stone-100 dark:divide-ink-900">
                 {data.enquiries.slice(0, 5).map((b) => (
                   <li key={b._id} className="flex items-center gap-3 px-4 py-3">
                     <span className="rounded-lg bg-amber-50 p-2 text-amber-600 dark:bg-amber-950/50 dark:text-amber-400"><Inbox className="h-4 w-4" /></span>
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-medium">{b.clientName}</p>
-                      <p className="truncate text-xs text-slate-500 dark:text-zinc-500">
+                      <p className="truncate text-xs text-stone-500 dark:text-stone-500">
                         {bookingNumber(b)} · {eventTypeLabel(b.eventType)} · {formatEventDate(b.eventDate)} · {formatRelative(b.createdAt)}
                       </p>
                     </div>
-                    <a href={`tel:${b.clientPhone}`} className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-blue-600 dark:hover:bg-zinc-800" aria-label={`Call ${b.clientName}`}>
+                    <a href={`tel:${b.clientPhone}`} className="rounded-lg p-2 text-stone-400 hover:bg-stone-100 hover:text-gold-500 dark:hover:bg-ink-800" aria-label={`Call ${b.clientName}`}>
                       <Phone className="h-4 w-4" />
                     </a>
                   </li>
@@ -369,13 +369,13 @@ export default function DashboardPage() {
             ) : (
               <div className="grid grid-cols-2 gap-3 p-4 sm:grid-cols-4">
                 {data.recentMedia.map((m: MediaFile & { eventName: string; eventId: string }) => (
-                  <Link key={m.publicId} href={`/events/${m.eventId}`} className="group overflow-hidden rounded-lg bg-slate-100 dark:bg-zinc-900">
+                  <Link key={m.publicId} href={`/events/${m.eventId}`} className="group overflow-hidden rounded-lg bg-stone-100 dark:bg-ink-800">
                     <div className="relative">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img src={thumbUrl(m, 300)} alt={m.originalName} loading="lazy" className="aspect-square w-full object-cover transition-transform duration-300 group-hover:scale-105" />
                       {m.type === "video" && <Video className="absolute right-2 top-2 h-4 w-4 text-white drop-shadow" />}
                     </div>
-                    <p className="truncate px-2 py-1.5 text-[11px] text-slate-500 dark:text-zinc-400">
+                    <p className="truncate px-2 py-1.5 text-[11px] text-stone-500 dark:text-stone-400">
                       <Clock className="mr-1 inline h-3 w-3" />
                       {m.eventName} · {formatDate(m.uploadedAt)}
                     </p>

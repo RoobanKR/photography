@@ -47,6 +47,29 @@
   --radius-4xl: calc(var(--radius) + 16px);
 }
 
+/* ---------- KR5 studio palette: the public website's cream, gold and warm ink ---------- */
+@theme {
+  /* cream page background, as used on the website */
+  --color-cream: #f5f1ec;
+  --color-cream-200: #efe9e1;
+
+  /* gold accent (website uses #b8935a on light, #d6b26e on dark) */
+  --color-gold-50: #faf6f0;
+  --color-gold-100: #f1e7d8;
+  --color-gold-200: #e5d3b5;
+  --color-gold-300: #d6b26e;
+  --color-gold-400: #c9a263;
+  --color-gold-500: #b8935a;
+  --color-gold-600: #9d7c48;
+  --color-gold-700: #7e6238;
+
+  /* warm ink for dark mode, replacing the blue-grey zinc scale */
+  --color-ink-700: #3a332e;
+  --color-ink-800: #272220;
+  --color-ink-900: #1b1815;
+  --color-ink-950: #141210;
+}
+
 :root {
   --radius: 0.625rem;
   --background: oklch(1 0 0);
@@ -55,8 +78,8 @@
   --card-foreground: oklch(0.141 0.005 285.823);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.141 0.005 285.823);
-  --primary: oklch(0.21 0.006 285.885);
-  --primary-foreground: oklch(0.985 0 0);
+  --primary: #b8935a;
+  --primary-foreground: #ffffff;
   --secondary: oklch(0.967 0.001 286.375);
   --secondary-foreground: oklch(0.21 0.006 285.885);
   --muted: oklch(0.967 0.001 286.375);
@@ -66,7 +89,7 @@
   --destructive: oklch(0.577 0.245 27.325);
   --border: oklch(0.92 0.004 286.32);
   --input: oklch(0.92 0.004 286.32);
-  --ring: oklch(0.705 0.015 286.067);
+  --ring: #b8935a;
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
@@ -89,8 +112,8 @@
   --card-foreground: oklch(0.985 0 0);
   --popover: oklch(0.21 0.006 285.885);
   --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.92 0.004 286.32);
-  --primary-foreground: oklch(0.21 0.006 285.885);
+  --primary: #d6b26e;
+  --primary-foreground: #141210;
   --secondary: oklch(0.274 0.006 286.033);
   --secondary-foreground: oklch(0.985 0 0);
   --muted: oklch(0.274 0.006 286.033);
@@ -100,7 +123,7 @@
   --destructive: oklch(0.704 0.191 22.216);
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.552 0.016 285.938);
+  --ring: #d6b26e;
   --chart-1: oklch(0.488 0.243 264.376);
   --chart-2: oklch(0.696 0.17 162.48);
   --chart-3: oklch(0.769 0.188 70.08);

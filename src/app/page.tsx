@@ -113,23 +113,16 @@ export default function Website() {
             </span>
           </a>
 
-          <div className="flex items-center gap-6 sm:gap-10">
-            <Link
-              href={studioLink}
-              className={`hidden text-[11px] uppercase tracking-[0.35em] transition-colors sm:block ${
-                scrolled ? "text-stone-600 hover:text-[#b8935a]" : "text-white/80 hover:text-white"
-              }`}
-            >
-              {signedIn ? "Studio" : "Login"}
-            </Link>
+          <div className="flex items-center gap-4 sm:gap-10">
+           
             <button
               onClick={() => setMenuOpen(true)}
-              className={`group flex items-center gap-4 text-[11px] uppercase tracking-[0.35em] ${scrolled ? "text-stone-700" : "text-white"}`}
+              className={`group flex items-center gap-2 whitespace-nowrap text-[10px] uppercase tracking-[0.2em] sm:gap-4 sm:text-[11px] sm:tracking-[0.35em] ${scrolled ? "text-stone-700" : "text-white"}`}
             >
               Menu
-              <span className="flex w-10 flex-col gap-[5px]">
+              <span className="flex w-7 flex-col gap-[5px] sm:w-10">
                 <span className="h-px w-full bg-current transition-all duration-300 group-hover:w-6" />
-                <span className="h-px w-6 self-end bg-current transition-all duration-300 group-hover:w-full" />
+                <span className="h-px w-4 self-end bg-current transition-all duration-300 group-hover:w-full sm:w-6" />
               </span>
             </button>
           </div>
@@ -268,12 +261,7 @@ function FullscreenMenu({
                 <SocialIcon href={STUDIO.instagram} label="Instagram"><Instagram className="h-4 w-4" /></SocialIcon>
                 <SocialIcon href={STUDIO.youtube} label="YouTube"><Youtube className="h-4 w-4" /></SocialIcon>
               </div>
-              <Link
-                href={studioLink}
-                className="inline-flex items-center gap-3 border border-[#d6b26e]/60 px-6 py-3 text-[11px] uppercase tracking-[0.35em] text-[#d6b26e] transition-colors hover:bg-[#d6b26e] hover:text-[#141210]"
-              >
-                {signedIn ? "Open studio" : "Studio login"} <ArrowRight className="h-4 w-4" />
-              </Link>
+            
             </motion.div>
           </div>
         </motion.div>
@@ -437,14 +425,14 @@ function About() {
           </Reveal>
         </div>
 
-        <div className="relative h-[520px] sm:h-[640px]">
-          <RevealImage src={STORIES[0].image} alt="Wedding couple" className="absolute right-0 top-0 h-[80%] w-[72%]" />
+        <div className="relative -mx-5 h-[520px] sm:mx-0 sm:h-[640px]">
+          <RevealImage src={STORIES[0].image} alt="Wedding couple" className="absolute right-0 top-0 h-[80%] w-full sm:w-[72%]" />
           <RevealImage src={PORTFOLIO[0]} alt="Bride portrait" className="absolute bottom-0 left-0 h-[52%] w-[46%] border-[10px] border-[#f5f1ec]" />
           <div className="absolute -left-2 top-10 hidden text-[#b8935a] lg:block">
             <DrawLine className="h-40" />
           </div>
           <motion.div
-            className="absolute bottom-10 right-4 font-serif text-[120px] font-light leading-none text-[#b8935a]/15 sm:text-[160px]"
+            className="absolute bottom-10 right-4 hidden font-serif text-[120px] font-light leading-none text-[#b8935a]/15 sm:block sm:text-[160px]"
             initial={{ opacity: 0, x: 40 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
@@ -502,7 +490,7 @@ function Stories() {
           {STORIES.map((story, i) => (
             <Reveal key={story.names} delay={(i % 2) * 0.15}>
               <a href="#portfolio" className="group block">
-                <div className="overflow-hidden">
+                <div className="-mx-5 overflow-hidden sm:mx-0">
                   <RevealImage
                     src={story.image}
                     alt={story.names}
@@ -579,7 +567,7 @@ function Portfolio() {
           </Reveal>
         </div>
 
-        <div className="mt-10 grid grid-cols-2 gap-2 sm:gap-3 md:grid-cols-3">
+        <div className="-mx-5 mt-10 grid grid-cols-2 gap-2 sm:mx-0 sm:gap-3 md:grid-cols-3">
           {PORTFOLIO.map((src, i) => (
             <motion.button
               key={src}
@@ -682,7 +670,7 @@ function Services() {
           </Reveal>
         </div>
 
-        <div className="mt-10 grid gap-px bg-stone-300/60 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="-mx-5 mt-10 grid gap-px bg-stone-300/60 sm:mx-0 sm:grid-cols-2 lg:grid-cols-3">
           {SERVICES.map((service, i) => (
             <Reveal key={service.title} delay={(i % 3) * 0.1} className="bg-[#f5f1ec]">
               <div className="group relative h-full overflow-hidden p-8 sm:p-10">
@@ -691,21 +679,21 @@ function Services() {
                   src={service.image}
                   alt=""
                   loading="lazy"
-                  className="absolute inset-0 h-full w-full translate-y-full object-cover transition-transform duration-700 ease-out group-hover:translate-y-0 [@media(hover:none)]:translate-y-0"
+                  className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                 />
-                <div className="absolute inset-0 translate-y-full bg-black/55 transition-transform duration-700 ease-out group-hover:translate-y-0 [@media(hover:none)]:translate-y-0" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/60 to-black/35 transition-opacity duration-500 group-hover:opacity-85" />
 
                 <div className="relative">
-                  <span className="font-serif text-5xl font-light text-[#b8935a]/50 transition-colors duration-500 group-hover:text-[#d6b26e] [@media(hover:none)]:text-[#d6b26e]">
+                  <span className="font-serif text-5xl font-light text-[#d6b26e]">
                     0{i + 1}
                   </span>
-                  <h3 className="mt-10 font-serif text-2xl uppercase tracking-[0.12em] text-stone-800 transition-colors duration-500 group-hover:text-white [@media(hover:none)]:text-white">
+                  <h3 className="mt-10 font-serif text-2xl uppercase tracking-[0.12em] text-white">
                     {service.title}
                   </h3>
-                  <p className="mt-4 leading-relaxed text-stone-500 transition-colors duration-500 group-hover:text-white/80 [@media(hover:none)]:text-white/80">{service.text}</p>
+                  <p className="mt-4 leading-relaxed text-white/80">{service.text}</p>
                   <a
                     href="#contact"
-                    className="mt-8 inline-flex items-center gap-3 text-[10px] uppercase tracking-[0.35em] text-stone-700 transition-colors duration-500 group-hover:text-white [@media(hover:none)]:text-white"
+                    className="mt-8 inline-flex items-center gap-3 text-[10px] uppercase tracking-[0.35em] text-white transition-colors duration-500 group-hover:text-[#d6b26e]"
                   >
                     Enquire <ArrowRight className="h-3.5 w-3.5" />
                   </a>

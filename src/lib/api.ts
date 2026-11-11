@@ -3,7 +3,13 @@
 // UserToken collection at login, so a request is only treated as "logged out"
 // when the server answers 401 — never because the server is briefly unreachable.
 
-export const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+// A deployed page must never ask the browser for http://localhost: that is the
+// visitor's own machine, so the browser shows a local-network permission prompt
+// and the request fails either way. Only local development falls back to it;
+// a deployed build without NEXT_PUBLIC_API_URL uses a same-origin /api instead.
+export const API_URL =
+  process.env.NEXT_PUBLIC_API_URL ||
+  (process.env.NODE_ENV === "development" ? "http://localhost:5000/api" : "/api");
 
 const TOKEN_KEY = "token";
 const USER_KEY = "user";

@@ -57,10 +57,10 @@ const formatRole = (role?: string) =>
   role ? role.charAt(0).toUpperCase() + role.slice(1) : "Member";
 
 function useTheme() {
-  const [theme, setTheme] = useState<"light" | "dark">("dark");
+  const [theme, setTheme] = useState<"light" | "dark">("light");
 
   useEffect(() => {
-    const saved = localStorage.getItem("theme") === "light" ? "light" : "dark";
+    const saved = localStorage.getItem("theme") === "dark" ? "dark" : "light";
     setTheme(saved);
   }, []);
 
@@ -79,7 +79,7 @@ function useTheme() {
 
 function FullScreenMessage({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex h-screen w-full items-center justify-center bg-slate-50 dark:bg-black text-slate-600 dark:text-zinc-400">
+    <div className="flex h-screen w-full items-center justify-center bg-cream dark:bg-ink-950 text-stone-600 dark:text-stone-400">
       {children}
     </div>
   );
@@ -121,12 +121,12 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         <div className="text-center space-y-4 px-6">
           <WifiOff className="w-10 h-10 mx-auto text-amber-500" />
           <div>
-            <p className="font-semibold text-slate-900 dark:text-white">Can&apos;t reach the server</p>
+            <p className="font-semibold text-stone-900 dark:text-white">Can&apos;t reach the server</p>
             <p className="text-sm mt-1">You are still signed in. Start the server, then try again.</p>
           </div>
           <button
             onClick={retry}
-            className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+            className="inline-flex items-center gap-2 rounded-lg bg-gold-500 px-4 py-2 text-sm font-medium text-white hover:bg-gold-600"
           >
             <RefreshCw className="w-4 h-4" /> Retry
           </button>
@@ -138,7 +138,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   if (status === "checking" && !user) {
     return (
       <FullScreenMessage>
-        <Loader2 className="w-6 h-6 animate-spin text-blue-600" />
+        <Loader2 className="w-6 h-6 animate-spin text-gold-500" />
       </FullScreenMessage>
     );
   }
@@ -149,39 +149,39 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   const initial = user?.name?.[0]?.toUpperCase() ?? "U";
 
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-slate-50 dark:bg-black text-slate-900 dark:text-white">
+    <div className="flex h-screen w-full overflow-hidden bg-cream dark:bg-ink-950 text-stone-900 dark:text-white">
       {mobileOpen && (
         <div className="fixed inset-0 z-30 bg-black/40 backdrop-blur-sm md:hidden" onClick={() => setMobileOpen(false)} />
       )}
 
       {/* Sidebar */}
       <aside
-        className={`fixed md:static inset-y-0 left-0 z-40 flex h-full flex-col border-r border-slate-200 bg-white transition-all duration-300 dark:border-zinc-800 dark:bg-zinc-950
+        className={`fixed md:static inset-y-0 left-0 z-40 flex h-full flex-col border-r border-stone-200 bg-white transition-all duration-300 dark:border-ink-800 dark:bg-ink-900
           ${mobileOpen ? "translate-x-0 w-56 shadow-2xl" : "-translate-x-full md:translate-x-0"}
           ${collapsed ? "md:w-14" : "md:w-52"}`}
       >
         <div className={`flex h-12 items-center ${collapsed ? "justify-center" : "justify-between px-4"}`}>
           <Link href="/dashboard" className="flex items-center gap-2.5">
-            <div className="rounded-lg bg-blue-600 p-1.5 text-white shadow-sm shadow-blue-500/30">
+            <div className="rounded-lg bg-gold-500 p-1.5 text-white shadow-sm shadow-gold-400/30">
               <Aperture className="h-5 w-5" />
             </div>
-            {!collapsed && <span className="text-lg font-bold tracking-tight">KR5</span>}
+            {!collapsed && <span className="font-serif text-xl tracking-[0.2em] text-stone-800 dark:text-gold-300">KR5</span>}
           </Link>
           <button
             onClick={() => setCollapsed(!collapsed)}
-            className="hidden rounded-md p-1.5 text-slate-400 hover:bg-slate-100 hover:text-blue-600 dark:hover:bg-zinc-800 md:flex"
+            className="hidden rounded-md p-1.5 text-stone-400 hover:bg-stone-100 hover:text-gold-500 dark:hover:bg-ink-800 md:flex"
             aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
           >
             {collapsed ? <PanelLeftOpen className="h-4 w-4" /> : <PanelLeftClose className="h-4 w-4" />}
           </button>
-          <button onClick={() => setMobileOpen(false)} className="p-1 text-slate-400 md:hidden" aria-label="Close menu">
+          <button onClick={() => setMobileOpen(false)} className="p-1 text-stone-400 md:hidden" aria-label="Close menu">
             <X className="h-5 w-5" />
           </button>
         </div>
 
         <nav className="flex-1 space-y-0.5 overflow-y-auto py-3">
           {!collapsed && (
-            <p className="px-4 pb-1.5 text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-zinc-600">
+            <p className="px-4 pb-1.5 text-[10px] font-semibold uppercase tracking-[0.25em] text-gold-500/80 dark:text-gold-300/70">
               Studio
             </p>
           )}
@@ -196,13 +196,13 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                 <div
                   key={href}
                   title={`${label} (coming soon)`}
-                  className={`${base} cursor-not-allowed text-slate-400 dark:text-zinc-600`}
+                  className={`${base} cursor-not-allowed text-stone-400 dark:text-stone-600`}
                 >
                   <Icon className="h-4 w-4 shrink-0" />
                   {!collapsed && (
                     <>
                       <span className="font-medium">{label}</span>
-                      <span className="ml-auto rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold dark:bg-zinc-800">
+                      <span className="ml-auto rounded-full bg-stone-100 px-2 py-0.5 text-[10px] font-semibold dark:bg-ink-800">
                         Soon
                       </span>
                     </>
@@ -218,8 +218,8 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                 title={collapsed ? label : undefined}
                 className={`${base} ${
                   active
-                    ? "bg-blue-600 font-semibold text-white shadow-md shadow-blue-500/20"
-                    : "font-medium text-slate-600 hover:bg-blue-50 hover:text-blue-700 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-blue-400"
+                    ? "bg-gold-500 font-semibold text-white shadow-md shadow-gold-400/20"
+                    : "font-medium text-stone-600 hover:bg-gold-50 hover:text-gold-600 dark:text-stone-400 dark:hover:bg-ink-800 dark:hover:text-gold-300"
                 }`}
               >
                 <Icon className="h-4 w-4 shrink-0" />
@@ -229,15 +229,15 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           })}
         </nav>
 
-        <div className="border-t border-slate-100 p-2 dark:border-zinc-900">
+        <div className="border-t border-stone-100 p-2 dark:border-ink-800">
           <div className={`flex items-center gap-2.5 px-2 py-1.5 ${collapsed ? "justify-center" : ""}`}>
-            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blue-600 text-sm font-medium text-white">
+            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gold-500 text-sm font-medium text-white">
               {initial}
             </div>
             {!collapsed && (
               <div className="min-w-0">
                 <p className="truncate text-sm font-medium">{user?.name}</p>
-                <p className="truncate text-xs text-slate-400 dark:text-zinc-500">{formatRole(user?.role)}</p>
+                <p className="truncate text-xs text-stone-400 dark:text-stone-500">{formatRole(user?.role)}</p>
               </div>
             )}
           </div>
@@ -246,18 +246,18 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
       {/* Main */}
       <main className="relative flex h-full flex-1 flex-col overflow-hidden">
-        <header className="z-10 flex h-12 items-center justify-between border-b border-slate-200 bg-white px-3 dark:border-zinc-800 dark:bg-zinc-950 md:px-4">
+        <header className="z-10 flex h-12 items-center justify-between border-b border-stone-200 bg-white px-3 dark:border-ink-800 dark:bg-ink-900 md:px-4">
           <div className="flex items-center gap-3">
-            <button onClick={() => setMobileOpen(true)} className="text-slate-500 md:hidden" aria-label="Open menu">
+            <button onClick={() => setMobileOpen(true)} className="text-stone-500 md:hidden" aria-label="Open menu">
               <Menu className="h-5 w-5" />
             </button>
-            <h1 className="text-base font-semibold">{pageTitle}</h1>
+            <h1 className="font-serif text-xl tracking-[0.12em] text-stone-800 dark:text-stone-100">{pageTitle}</h1>
           </div>
 
           <div className="flex items-center gap-2">
             <button
               onClick={toggle}
-              className="rounded-full p-1.5 text-slate-400 hover:bg-slate-100 hover:text-blue-600 dark:hover:bg-zinc-800"
+              className="rounded-full p-1.5 text-stone-400 hover:bg-stone-100 hover:text-gold-500 dark:hover:bg-ink-800"
               aria-label="Toggle theme"
             >
               {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
@@ -266,23 +266,23 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
             <div className="relative" ref={profileRef}>
               <button
                 onClick={() => setProfileOpen(!profileOpen)}
-                className="flex items-center gap-2 rounded-lg px-1.5 py-1 hover:bg-slate-100 dark:hover:bg-zinc-800"
+                className="flex items-center gap-2 rounded-lg px-1.5 py-1 hover:bg-stone-100 dark:hover:bg-ink-800"
               >
                 <div className="hidden text-right sm:block">
                   <p className="text-xs font-medium leading-tight">{user?.name}</p>
-                  <p className="text-[10px] leading-tight text-slate-400 dark:text-zinc-500">{formatRole(user?.role)}</p>
+                  <p className="text-[10px] leading-tight text-stone-400 dark:text-stone-500">{formatRole(user?.role)}</p>
                 </div>
-                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-blue-600 text-xs font-medium text-white">
+                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-gold-500 text-xs font-medium text-white">
                   {initial}
                 </div>
-                <ChevronDown className={`h-4 w-4 text-slate-400 transition-transform ${profileOpen ? "rotate-180" : ""}`} />
+                <ChevronDown className={`h-4 w-4 text-stone-400 transition-transform ${profileOpen ? "rotate-180" : ""}`} />
               </button>
 
               {profileOpen && (
-                <div className="absolute right-0 z-50 mt-2 w-64 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-xl dark:border-zinc-800 dark:bg-zinc-900">
-                  <div className="border-b border-slate-100 p-4 dark:border-zinc-800">
+                <div className="absolute right-0 z-50 mt-2 w-64 overflow-hidden rounded-lg border border-stone-200 bg-white shadow-xl dark:border-ink-800 dark:bg-ink-800">
+                  <div className="border-b border-stone-100 p-4 dark:border-ink-800">
                     <p className="font-medium">{user?.name}</p>
-                    <p className="truncate text-sm text-slate-500 dark:text-zinc-400">{user?.email}</p>
+                    <p className="truncate text-sm text-stone-500 dark:text-stone-400">{user?.email}</p>
                   </div>
                   <button
                     onClick={logout}
@@ -296,7 +296,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           </div>
         </header>
 
-        <div className="flex-1 overflow-y-auto bg-slate-50 p-3 dark:bg-black md:p-4">{children}</div>
+        <div className="flex-1 overflow-y-auto bg-cream p-3 dark:bg-ink-950 md:p-4">{children}</div>
       </main>
     </div>
   );
